@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "HJ5VmbPUzyc=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Admin\\Desktop\\eShop\\src\\Identity.API\\Identity.API.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.aspnetcore.openapi\\9.0.4\\microsoft.aspnetcore.openapi.9.0.4.nupkg.sha512",
+    "C:\\Users\\Admin\\.nuget\\packages\\microsoft.openapi\\1.6.17\\microsoft.openapi.1.6.17.nupkg.sha512"
+  ],
+  "logs": []
+}
