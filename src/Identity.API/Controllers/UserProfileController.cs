@@ -4,13 +4,13 @@ using Identity.API.Models.DTOs;
 
 namespace Identity.API.Controllers
 {
-    public class UserProfileController : BaseController<UserAddressDto>
+    public class UserProfileController : BaseController<UserProfileDto>
     {
-        public UserProfileController(IGenericService<UserAddressDto> userAddressService) : base(userAddressService)
+        public UserProfileController(IGenericService<UserProfileDto> userProfileService) : base(userProfileService)
         {
-            if (userAddressService == null)
+            if (userProfileService == null)
             {
-                throw new ArgumentNullException(nameof(userAddressService));
+                throw new ArgumentNullException(nameof(userProfileService));
             }   
         }
     }
