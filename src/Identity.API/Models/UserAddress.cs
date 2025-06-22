@@ -9,7 +9,6 @@ namespace Identity.API.Models
         [Key]
         public Guid Id { get; set; }
 
-        [ForeignKey("ApplicationUser")]
         public string UserId { get; set; } = string.Empty;
 
         [Required, MaxLength(255)]
@@ -31,8 +30,7 @@ namespace Identity.API.Models
         public string City { get; set; } = string.Empty;
 
         public bool IsDefault { get; set; } = false;
-
-        public ApplicationUser User { get; set; } = null!;
+        public ApplicationUser User { get; set; }
     }
 
 }

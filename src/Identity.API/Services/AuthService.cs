@@ -49,32 +49,19 @@ namespace Identity.API.Services
 
         public async Task<SignInResult> SignInUserAsync(LoginDto loginDto)
         {
-            var user = new ApplicationUser
-            {
-                UserName = loginDto.Username
-            };
-
-            var password = loginDto.Password;
-
             var existingUser = await _userManager.FindByNameAsync(loginDto.Username);
             if (existingUser == null)
             {
                 return SignInResult.Failed;
             }
 
-            var result = await _signInManager.PasswordSignInAsync(user, password, isPersistent: false, lockoutOnFailure: false);
-            if (result.Succeeded)
-            {
-                return SignInResult.Success;
-            }
-            else if (result.IsLockedOut)
-            {
-                return SignInResult.LockedOut;
-            }
-            else
-            {
-                return SignInResult.Failed;
-            }
+            var result = await _signInManager.PasswordSignInAsync(
+                existingUser.UserName,
+                loginDto.Password,
+                isPersistent: false,
+                lockoutOnFailure: false
+            );
+            return result;
         }
 
         public async Task SignOutUserAsync()
@@ -85,6 +72,18 @@ namespace Identity.API.Services
         public async Task<ApplicationUser> GetUserByUsernameAsync(string username)
         {
             return await _userManager.FindByNameAsync(username) ?? throw new Exception("User not found.");
+        }
+
+        public async Task<ApplicationUser> GetCurrentUserAsync()
+        {
+            var user = _signInManager.Context.User;
+            if (user == null || !user.Identity.IsAuthenticated)
+            {
+                return null;
+            }
+
+            var userId = _userManager.GetUserId(user);
+            return await _userManager.FindByIdAsync(userId) ?? throw new Exception("User not found.");
         }
     }
 }

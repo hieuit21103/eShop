@@ -59,5 +59,23 @@ namespace Identity.API.Controllers
             return Ok(new { Message = "User logged out successfully." });
         }
 
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var user = await _authService.GetCurrentUserAsync();
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            return Ok(new
+            {
+                user.Id,
+                user.UserName,
+                user.Email,
+                FullName = user.Profile?.FullName,
+                AvatarUrl = user.Profile?.AvatarUrl
+            });
+        }
     }
 }

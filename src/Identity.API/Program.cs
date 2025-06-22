@@ -76,6 +76,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.MapControllers();
+
 app.UseHttpsRedirection();
 
 using (var scope = app.Services.CreateScope())

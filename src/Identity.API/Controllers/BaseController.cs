@@ -63,9 +63,9 @@ namespace Identity.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Policy = "AdminOnly")]
-        public IActionResult Update(object id, [FromBody] T entity)
+        public IActionResult Update([FromRoute] Guid id, [FromBody] T entity)
         {
-            if (id == null || entity == null)
+            if (entity == null)
             {
                 return BadRequest("Id and entity cannot be null.");
             }
