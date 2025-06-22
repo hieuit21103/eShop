@@ -4,15 +4,9 @@ using Identity.API.Models.DTOs;
 
 namespace Identity.API.Controllers
 {
-    public class UserProfileController : BaseController<UserProfileDto>
+    public class UserProfileController : BaseController<UserProfile>
     {
-        public UserProfileController(IGenericService<UserProfileDto> userProfileService) : base(userProfileService)
-        {
-            if (userProfileService == null)
-            {
-                throw new ArgumentNullException(nameof(userProfileService));
-            }   
-        }
+        public UserProfileController(IGenericService<UserProfile> userProfileService) : base(userProfileService){}
     }
 }
     

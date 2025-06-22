@@ -15,6 +15,6 @@ namespace Identity.API.Models
         [Required, MaxLength(20)]
         public string AvatarUrl { get; set; } = string.Empty;
 
-        public ApplicationUser User { get; set; }
+        public ApplicationUser? User { get; set; }
     }
 }

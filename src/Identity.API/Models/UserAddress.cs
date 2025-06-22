@@ -30,7 +30,7 @@ namespace Identity.API.Models
         public string City { get; set; } = string.Empty;
 
         public bool IsDefault { get; set; } = false;
-        public ApplicationUser User { get; set; }
+        public ApplicationUser? User { get; set; }
     }
 
 }

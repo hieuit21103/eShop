@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Identity.API.Data;
+using Identity.API.Models;
+using Identity.API.Models.DTOs;
 using Identity.API.Services.Interfaces;
+
 
 namespace Identity.API.Services
 {

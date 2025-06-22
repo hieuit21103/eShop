@@ -15,9 +15,10 @@ namespace Identity.API.Services
 
         public async Task<IEnumerable<UserAddress>> GetUserAddressesAsync(string userId)
         {
-            return await _context.UserAddresses
+            var userAddresses = await _context.UserAddresses
                 .Where(ua => ua.UserId == userId)
                 .ToListAsync();
+            return userAddresses;
         }
 
         public async Task<UserAddress> GetUserAddressByIdAsync(Guid addressId)
