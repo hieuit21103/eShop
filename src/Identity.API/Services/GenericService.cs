@@ -1,8 +1,9 @@
-using Microsoft.EntityFrameworkCore;
 using Identity.API.Data;
-using Identity.API.Models;
-using Identity.API.Models.DTOs;
 using Identity.API.Services.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 
 namespace Identity.API.Services
@@ -21,12 +22,26 @@ namespace Identity.API.Services
 
         public virtual IEnumerable<T> GetAll()
         {
-            return _dbSet.ToList() ?? throw new InvalidOperationException("No entities found.");
+            var list = _dbSet.ToList();
+            if (list == null || !list.Any())
+                throw new KeyNotFoundException("No entities found.");
+            return list;
         }
 
         public virtual T GetById(object id)
         {
-            return _dbSet.Find(id) ?? throw new KeyNotFoundException($"Entity with id {id} not found.");
+            var entity = _dbSet.Find(id);
+            if (entity == null)
+                throw new KeyNotFoundException($"Entity with id {id} not found.");
+            return entity;
+        }
+
+        public virtual T GetByUserId(object id)
+        {
+            var entity = _dbSet.FirstOrDefault(e => EF.Property<object>(e, "UserId").Equals(id));
+            if (entity == null)
+                throw new KeyNotFoundException($"Entity with UserId {id} not found.");
+            return entity;
         }
 
         public virtual void Add(T entity)

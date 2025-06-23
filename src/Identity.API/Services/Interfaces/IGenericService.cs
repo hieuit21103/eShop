@@ -22,6 +22,13 @@ namespace Identity.API.Services.Interfaces
         T GetById(object id);
 
         /// <summary>
+        /// Gets an entity by its user identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the user.</param>
+        /// <returns>The entity with the specified user identifier.</returns>
+        T GetByUserId(object id);
+
+        /// <summary>
         /// Adds a new entity.
         /// </summary>
         /// <param name="entity">The entity to add.</param>

@@ -6,7 +6,7 @@ namespace Identity.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BaseController<T> : ControllerBase where T : class
+    public abstract class BaseController<T> : ControllerBase where T : class
     {
         protected readonly IGenericService<T> _genericService;
 
@@ -16,6 +16,7 @@ namespace Identity.API.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminOnly")]
         public IActionResult GetAll()
         {
             var entities = _genericService.GetAll();
@@ -23,13 +24,9 @@ namespace Identity.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(object id)
+        [Authorize(Policy = "AdminOnly")]
+        public IActionResult GetById(Guid id)
         {
-            if (id == null)
-            {
-                return BadRequest("Id cannot be null.");
-            }
-
             try
             {
                 var entity = _genericService.GetById(id);
@@ -43,7 +40,7 @@ namespace Identity.API.Controllers
 
         [HttpPost]
         [Authorize(Policy = "AdminOnly")]
-        public IActionResult Add([FromBody] T entity)
+        public virtual IActionResult Add([FromBody] T entity)
         {
             if (entity == null)
             {
@@ -63,7 +60,7 @@ namespace Identity.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Policy = "AdminOnly")]
-        public IActionResult Update([FromRoute] Guid id, [FromBody] T entity)
+        public virtual IActionResult Update([FromRoute] Guid id, [FromBody] T entity)
         {
             if (entity == null)
             {
@@ -89,7 +86,7 @@ namespace Identity.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Policy = "AdminOnly")]
-        public IActionResult Delete(object id)
+        public virtual IActionResult Delete(object id)
         {
             if (id == null)
             {

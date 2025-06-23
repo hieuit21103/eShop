@@ -7,7 +7,7 @@ namespace Identity.API.Models
     {
         [Key]
         public Guid Id { get; set; }
-        public string UserId { get; set; } = string.Empty;
+        public string? UserId { get; set; } = string.Empty;
 
         [Required, MaxLength(100)]
         public string FullName { get; set; } = string.Empty;
@@ -15,6 +15,7 @@ namespace Identity.API.Models
         [Required, MaxLength(20)]
         public string AvatarUrl { get; set; } = string.Empty;
 
+        [ForeignKey("UserId")]
         public ApplicationUser? User { get; set; }
     }
 }

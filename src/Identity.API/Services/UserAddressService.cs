@@ -12,19 +12,5 @@ namespace Identity.API.Services
         {
             _context = context;
         }
-
-        public async Task<IEnumerable<UserAddress>> GetUserAddressesAsync(string userId)
-        {
-            var userAddresses = await _context.UserAddresses
-                .Where(ua => ua.UserId == userId)
-                .ToListAsync();
-            return userAddresses;
-        }
-
-        public async Task<UserAddress> GetUserAddressByIdAsync(Guid addressId)
-        {
-            return await _context.UserAddresses
-                .FirstOrDefaultAsync(ua => ua.Id == addressId) ?? throw new KeyNotFoundException($"Address with id {addressId} not found.");
-        }
     }
 }

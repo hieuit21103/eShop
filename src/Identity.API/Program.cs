@@ -56,6 +56,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
 });
 
 builder.Services.AddScoped<AuthService>();
@@ -66,6 +67,7 @@ builder.Services.AddScoped<IGenericService<UserAddress>, UserAddressService>();
 builder.Services.AddScoped<IGenericService<UserProfile>, UserProfileService>();
 
 builder.Services.AddControllers();
+
 
 var app = builder.Build();
 

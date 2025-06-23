@@ -28,7 +28,7 @@ namespace Identity.API.Services
                 new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.Email, user.Email),
             };
-            
+
             foreach (var role in roles)
             {
                 claims = claims.Append(new Claim(ClaimTypes.Role, role)).ToArray();
@@ -46,6 +46,14 @@ namespace Identity.API.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public string GetIdFromToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(token);
+            var username = jwtToken.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value;
+            return username;
         }
     }
 }
