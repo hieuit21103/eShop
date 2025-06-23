@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Identity.API.Services.Interfaces
 {
     /// <summary>

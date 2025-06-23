@@ -34,6 +34,18 @@ namespace Identity.API.Controllers
             return BadRequest(result.Errors);
         }
 
+        [HttpGet("confirm-email/{userId}/{token}")]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            var result = await _authService.ConfirmEmailAsync(userId, token);
+            if (result.Succeeded)
+            {
+                return Ok(new { Message = "Email confirmed successfully." });
+            }
+
+            return BadRequest(result.Errors);
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> SignIn([FromBody] LoginDto loginDto)
         {

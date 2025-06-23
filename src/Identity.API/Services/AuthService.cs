@@ -2,6 +2,7 @@ using Identity.API.Data;
 using Identity.API.Models;
 using Identity.API.Models.DTOs;
 using Microsoft.AspNetCore.Identity;
+using DotNetEnv;
 
 namespace Identity.API.Services
 {
@@ -10,13 +11,17 @@ namespace Identity.API.Services
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly EmailService _emailService;
         private readonly ApplicationDbContext _context;
 
-        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ApplicationDbContext context)
+        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, EmailService emailService, ApplicationDbContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _context = context;
+            _emailService = emailService;
+            Env.Load();
+            Env.TraversePath().Load();
         }
 
         public async Task<IdentityResult> RegisterUserAsync(RegisterDto registerDto)
@@ -38,6 +43,9 @@ namespace Identity.API.Services
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
+                var apiUrl = Environment.GetEnvironmentVariable("API_URL");
+                var confirmationLink = apiUrl + "/api/auth/confirm-email/" + user.Id + "/" + Uri.EscapeDataString(await _userManager.GenerateEmailConfirmationTokenAsync(user));
+                await _emailService.SendConfirmationEmailAsync(user.Email, confirmationLink);
                 await _userManager.AddToRoleAsync(user, "User");
                 return result;
             }
@@ -53,6 +61,11 @@ namespace Identity.API.Services
             if (existingUser == null)
             {
                 return SignInResult.Failed;
+            }
+
+            if (!await _userManager.IsEmailConfirmedAsync(existingUser))
+            {
+                return SignInResult.NotAllowed;
             }
 
             var result = await _signInManager.PasswordSignInAsync(
@@ -84,6 +97,14 @@ namespace Identity.API.Services
 
             var userId = _userManager.GetUserId(user);
             return await _userManager.FindByIdAsync(userId) ?? throw new Exception("User not found.");
+        }
+
+        public async Task<IdentityResult> ConfirmEmailAsync(string userId, string token)
+        {
+            token = Uri.UnescapeDataString(token);
+            var user = await _userManager.FindByIdAsync(userId) ?? throw new Exception("User not found.");
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            return result;
         }
     }
 }

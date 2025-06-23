@@ -30,7 +30,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         ServerVersion.AutoDetect(connectionString));
 });
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(option => option.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
@@ -62,6 +62,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
 
+builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<IGenericService<ApplicationUser>, ApplicationUserService>();
 builder.Services.AddScoped<IGenericService<UserAddress>, UserAddressService>();
 builder.Services.AddScoped<IGenericService<UserProfile>, UserProfileService>();
