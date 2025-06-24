@@ -94,7 +94,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 app.MapControllers();
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 using (var scope = app.Services.CreateScope())
 {

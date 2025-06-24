@@ -93,41 +93,29 @@ namespace Identity.API.Controllers
         }
 
         [HttpGet("forgot-password/{email}")]
-        [Authorize(Policy = "UserOnly")]
+        // [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> ResetPassword([FromRoute] string email)
         {
             var userId = await _authService.GetUserIdByEmailAsync(email);
-            if (userId == _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
-            {
-                await _authService.SendPasswordResetEmailAsync(userId);
-                return Ok(new { Message = "Password reset email sent successfully." });
-            }
-            return Unauthorized();
+            await _authService.SendPasswordResetEmailAsync(userId);
+            return Ok(new { Message = "Password reset email sent successfully." });
         }
 
         [HttpGet("reset-password/{userId}/{token}")]
-        [Authorize(Policy = "UserOnly")]
+        // [Authorize(Policy = "UserOnly")]
         public IActionResult ResetPassword([FromRoute] string userId, [FromRoute] string token)
         {
-            if (userId == _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
+            return Ok(new
             {
-                return Ok(new
-                {
-                    Token = token,
-                    UserId = userId
-                });
-            }
-            return Unauthorized();
+                Token = token,
+                UserId = userId
+            });
         }
 
         [HttpPut("reset-password/{userId}/{token}")] 
-        [Authorize(Policy = "UserOnly")]
+        // [Authorize(Policy = "UserOnly")]
         public async Task<IActionResult> ResetPassword([FromRoute] string userId, [FromRoute] string token, [FromBody] ResetPasswordDto resetPasswordDto)
         {
-            if(userId != _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
-            {
-                return Unauthorized();
-            }
             if (resetPasswordDto.Password != resetPasswordDto.ConfirmPassword)
                 {
                     return BadRequest("Passwords do not match.");
