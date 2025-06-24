@@ -130,5 +130,11 @@ namespace Identity.API.Services
             var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
             return result;
         }
+
+        internal async Task<string> GetUserIdByEmailAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception("User not found.");
+            return user.Id;
+        }
     }
 }

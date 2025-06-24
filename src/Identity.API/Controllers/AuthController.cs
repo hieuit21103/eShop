@@ -92,10 +92,11 @@ namespace Identity.API.Controllers
             });
         }
 
-        [HttpGet("reset-password/{userId}")]
+        [HttpGet("forgot-password/{email}")]
         [Authorize(Policy = "UserOnly")]
-        public async Task<IActionResult> ResetPassword([FromRoute] string userId)
+        public async Task<IActionResult> ResetPassword([FromRoute] string email)
         {
+            var userId = await _authService.GetUserIdByEmailAsync(email);
             if (userId == _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
             {
                 await _authService.SendPasswordResetEmailAsync(userId);

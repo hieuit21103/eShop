@@ -69,9 +69,9 @@ GET /api/auth/me
 ### Gửi email đặt lại mật khẩu
 
 ```
-GET /api/auth/reset-password/{userId}
+GET /api/auth/forgot-password/{email}
 ```
-> Yêu cầu Bearer Token và userId trùng với user token.
+> Yêu cầu Bearer Token và userId lấy từ email trùng với user token.
 
 ### Lấy thông tin reset password
 
