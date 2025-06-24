@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useSearchParams } from "react-router";
 import { Eye, EyeOff, Lock, Mail, ArrowRight, User, UserPlus } from 'lucide-react';
+import { Link } from 'react-router';
 
 const RegisterPage: React.FC = () => {
     const [password, setPassword] = useState('');
@@ -7,6 +9,7 @@ const RegisterPage: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [searchParams] = useSearchParams();
 
     const handleSubmit = async () => {
         if (password !== confirmPassword) {
@@ -14,13 +17,25 @@ const RegisterPage: React.FC = () => {
             return;
         }
 
-        setIsLoading(true);
-
-        // Simulate API call
-        setTimeout(() => {
-            setIsLoading(false);
-            console.log('Register attempt:', { password, confirmPassword });
-        }, 2000);
+        const userId = searchParams.get("userId");
+        const token = searchParams.get("token");
+        if (userId && token) {
+            // Simulate API call to confirm email
+            const encodeToken = encodeURIComponent(token);
+            setIsLoading(true);
+            fetch('http://localhost:5295/api/auth/reset-password' + '/' + userId + '/' + encodeToken, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ password, confirmPassword }),
+            });
+            
+            setTimeout(() => {
+                setIsLoading(false);
+                console.log('Register attempt:', { password, confirmPassword });
+            }, 2000);
+        }
     };
 
     return (
@@ -141,9 +156,9 @@ const RegisterPage: React.FC = () => {
                     <div className="text-center">
                         <p className="text-sm text-gray-600">
                             Đã có tài khoản?{' '}
-                            <a href="#" className="font-medium text-blue-600 hover:text-purple-600 transition-colors">
+                            <Link to="/login" className="font-medium text-blue-600 hover:text-purple-600 transition-colors">
                                 Đăng nhập ngay
-                            </a>
+                            </Link>
                         </p>
                     </div>
                 </div>

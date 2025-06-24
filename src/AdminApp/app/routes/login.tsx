@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router';
 import { Eye, EyeOff, Lock, Mail, ArrowRight, User } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
@@ -13,7 +14,14 @@ const LoginPage: React.FC = () => {
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
-      console.log('Login attempt:', { username, password });
+      fetch('http://localhost:5295/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      })
+      // console.log('Login attempt:', { username, password });
     }, 2000);
   };
 
@@ -107,9 +115,9 @@ const LoginPage: React.FC = () => {
               </label>
             </div>
             <div className="text-sm">
-              <a href="#" className="font-medium text-blue-600 hover:text-purple-600 transition-colors">
+              <Link to="/forgot-password" className="font-medium text-blue-600 hover:text-purple-600 transition-colors">
                 Quên mật khẩu?
-              </a>
+              </Link>
             </div>
           </div>
 
@@ -176,9 +184,9 @@ const LoginPage: React.FC = () => {
           <div className="text-center">
             <p className="text-sm text-gray-600">
               Chưa có tài khoản?{' '}
-              <a href="#" className="font-medium text-blue-600 hover:text-purple-600 transition-colors">
+              <Link to="/register" className="font-medium text-blue-600 hover:text-purple-600 transition-colors">
                 Đăng ký ngay
-              </a>
+              </Link>
             </p>
           </div>
         </div>

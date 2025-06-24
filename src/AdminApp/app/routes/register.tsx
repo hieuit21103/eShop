@@ -27,6 +27,13 @@ const RegisterPage: React.FC = () => {
         // Simulate API call
         setTimeout(() => {
             setIsLoading(false);
+            fetch('http://localhost:5295/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, username, password }),
+            })
             console.log('Register attempt:', { email, username, password });
         }, 2000);
     };

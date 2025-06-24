@@ -10,6 +10,12 @@ const RegisterPage: React.FC = () => {
         setIsLoading(true);
 
         // Simulate API call
+        fetch('http://localhost:5295/api/auth/forgot-password/' + email, {   
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
         setTimeout(() => {
             setIsLoading(false);
             //   console.log('Register attempt:', { email, username, password });
