@@ -15,6 +15,17 @@ var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
 DotNetEnv.Env.TraversePath().Load();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
+
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -80,6 +91,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseCors("AllowAll");
 app.MapControllers();
 
 app.UseHttpsRedirection();
