@@ -1,174 +1,110 @@
 # Identity.API
 
-Dịch vụ quản lý xác thực và thông tin người dùng cho hệ thống eShop.
+API xác thực và quản lý người dùng cho hệ thống eShop.
 
----
+## Môi trường/Khởi tạo
 
-## 1. Xác thực & Tài khoản
+- Sử dụng MySQL, các biến môi trường cho cấu hình DB và JWT:
+  - `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`
+  - `JWT_ISSUER`, `JWT_AUDIENCE`, `JWT_KEY`
+- Khi chạy lần đầu sẽ tự động seed role, user mẫu.
+
+## Xác thực & Ủy quyền
+
+- Sử dụng JWT Bearer.
+- Policy:
+  - `AdminOnly`: yêu cầu role "Admin"
+  - `UserOnly`: yêu cầu role "User"
+
+## Các API chính
 
 ### Đăng ký
 
-```http
+```
 POST /api/auth/register
-Content-Type: application/json
-
+```
+Body (JSON):
+```json
 {
-  "email": "user@example.com",
-  "username": "yourusername",
-  "password": "yourpassword"
+  "username": "user",
+  "password": "password",
+  "email": "user@email.com"
 }
+```
+
+### Xác nhận email
+
+```
+GET /api/auth/confirm-email/{userId}/{token}
 ```
 
 ### Đăng nhập
 
-```http
+```
 POST /api/auth/login
-Content-Type: application/json
-
+```
+Body (JSON):
+```json
 {
-  "username": "yourusername",
-  "password": "yourpassword"
+  "username": "user",
+  "password": "password"
 }
 ```
-- **Response:** `{ "token": "<JWT Token>" }`
-
-### Lấy thông tin tài khoản hiện tại
-
-```http
-GET /api/auth/me
-Authorization: Bearer <JWT Token>
-```
+Response: `{ "Token": "..." }`
 
 ### Đăng xuất
 
-```http
-POST /api/auth/logout
-Authorization: Bearer <JWT Token>
 ```
+POST /api/auth/logout
+```
+> Yêu cầu user phải đăng nhập.
 
----
+### Lấy thông tin người dùng hiện tại
 
-## 2. Quản lý Profile
+```
+GET /api/auth/me
+```
+> Yêu cầu user phải đăng nhập.
 
-- **Lấy profile cá nhân**  
-  ```http
-  GET /api/userprofile/user/{userId}
-  Authorization: Bearer <JWT Token>
-  ```
+### Gửi email đặt lại mật khẩu
 
-- **Cập nhật profile cá nhân**  
-  ```http
-  PUT /api/userprofile/user/{userId}
-  Authorization: Bearer <JWT Token>
-  Content-Type: application/json
+```
+GET /api/auth/reset-password/{userId}
+```
+> Yêu cầu Bearer Token và userId trùng với user token.
 
-  {
-    // Thông tin profile cập nhật, ví dụ:
-    // "fullName": "Nguyen Van A",
-    // "avatarUrl": "https://yourcdn.com/avatar.jpg"
-  }
-  ```
+### Lấy thông tin reset password
 
-- **Admin:**  
-  Có thể sử dụng các API CRUD tiêu chuẩn:
-  - `GET /api/userprofile`
-  - `GET /api/userprofile/{id}`
-  - `POST /api/userprofile`
-  - `PUT /api/userprofile/{id}`
-  - `DELETE /api/userprofile/{id}`
-  - **Yêu cầu:** Token có quyền Admin (`Policy = "AdminOnly"`)
+```
+GET /api/auth/reset-password/{userId}/{token}
+```
+> Yêu cầu Bearer Token và userId trùng với user token.
 
----
+### Đặt lại mật khẩu
 
-## 3. Quản lý Địa chỉ người dùng
-
-### Cấu trúc thông tin địa chỉ (UserAddress)
-
+```
+PUT /api/auth/reset-password/{userId}/{token}
+```
+Body (JSON):
 ```json
 {
-  "fullName": "Nguyen Van A",
-  "phone": "0912345678",
-  "addressLine": "123 Đường ABC",
-  "ward": "Phường 1",
-  "district": "Quận 1",
-  "city": "TP.HCM",
-  "isDefault": true
+  "password": "newpassword",
+  "confirmPassword": "newpassword"
 }
 ```
+> Yêu cầu Bearer Token và userId trùng với user token.
 
-- **Lấy tất cả địa chỉ của user**
-  ```http
-  GET /api/useraddress/user/{userId}
-  Authorization: Bearer <JWT Token>
-  ```
+## Chạy thử local
 
-- **Thêm địa chỉ mới**
-  ```http
-  POST /api/useraddress/user/{userId}
-  Authorization: Bearer <JWT Token>
-  Content-Type: application/json
+```bash
+cd src/Identity.API
+dotnet run
+```
 
-  {
-    "fullName": "Nguyen Van A",
-    "phone": "0912345678",
-    "addressLine": "123 Đường ABC",
-    "ward": "Phường 1",
-    "district": "Quận 1",
-    "city": "TP.HCM",
-    "isDefault": false
-  }
-  ```
-
-- **Cập nhật địa chỉ**
-  ```http
-  PUT /api/useraddress/user/{userId}/{addressId}
-  Authorization: Bearer <JWT Token>
-  Content-Type: application/json
-
-  {
-    "fullName": "Nguyen Van B",
-    "phone": "0999888777",
-    "addressLine": "456 Đường XYZ",
-    "ward": "Phường 2",
-    "district": "Quận 3",
-    "city": "TP.HCM",
-    "isDefault": true
-  }
-  ```
-
-- **Xóa địa chỉ**
-  ```http
-  DELETE /api/useraddress/user/{userId}/{addressId}
-  Authorization: Bearer <JWT Token>
-  ```
-
-- **Admin:**  
-  Có thể sử dụng các API CRUD tiêu chuẩn như mục profile.
+API docs (Swagger UI) có thể được bật ở chế độ Development tại `/swagger` hoặc theo cấu hình `app.MapOpenApi()`.
 
 ---
 
-## 4. Chuẩn bị & Chạy dự án
+## Liên hệ & Đóng góp
 
-1. Cài đặt .NET 8 SDK
-2. Khởi tạo DB, cấu hình connection string
-3. Chạy lệnh:
-    ```bash
-    dotnet restore
-    dotnet run --project src/Identity.API/Identity.API.csproj
-    ```
-
-Truy cập Swagger UI tại `/swagger` để thử nghiệm API.
-
----
-
-## 5. Lưu ý phân quyền
-
-- Các API quản trị (CRUD mặc định) yêu cầu quyền Admin (bearer token với policy "AdminOnly").
-- Các API truy cập/cập nhật thông tin cá nhân chỉ cho phép chính chủ user (bearer token với policy "UserOnly").
-
----
-
-## 6. Đóng góp & License
-
-- Đóng góp qua Pull Request hoặc Issues
-- License: MIT
+Vui lòng tạo issue hoặc pull request nếu muốn đóng góp hoặc gặp lỗi.

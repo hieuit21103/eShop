@@ -43,9 +43,7 @@ namespace Identity.API.Services
             var result = await _userManager.CreateAsync(user, password);
             if (result.Succeeded)
             {
-                var apiUrl = Environment.GetEnvironmentVariable("API_URL");
-                var confirmationLink = apiUrl + "/api/auth/confirm-email/" + user.Id + "/" + Uri.EscapeDataString(await _userManager.GenerateEmailConfirmationTokenAsync(user));
-                await _emailService.SendConfirmationEmailAsync(user.Email, confirmationLink);
+                await SendConfirmationEmailAsync(user.Id);
                 await _userManager.AddToRoleAsync(user, "User");
                 return result;
             }
@@ -99,6 +97,15 @@ namespace Identity.API.Services
             return await _userManager.FindByIdAsync(userId) ?? throw new Exception("User not found.");
         }
 
+        public async Task SendConfirmationEmailAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId) ?? throw new Exception("User not found.");
+            var token = Uri.EscapeDataString(await _userManager.GenerateEmailConfirmationTokenAsync(user));
+            var url = Environment.GetEnvironmentVariable("URL");
+            var confirmLink = url + "/confirm-email?userId=" + user.Id + "&token=" + token;
+            await _emailService.SendConfirmationEmailAsync(user.Email, confirmLink);
+        }
+
         public async Task<IdentityResult> ConfirmEmailAsync(string userId, string token)
         {
             token = Uri.UnescapeDataString(token);
@@ -111,8 +118,8 @@ namespace Identity.API.Services
         {
             var user = await _userManager.FindByIdAsync(userId) ?? throw new Exception("User not found.");
             var token = Uri.EscapeDataString(await _userManager.GeneratePasswordResetTokenAsync(user));
-            var apiUrl = Environment.GetEnvironmentVariable("API_URL");
-            var resetLink = apiUrl + "/api/auth/reset-password/" + user.Id + "/" + token;
+            var url = Environment.GetEnvironmentVariable("URL");
+            var resetLink = url + "/reset-password?userId=" + user.Id + "&token=" + token;
             await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink);
         }
 
