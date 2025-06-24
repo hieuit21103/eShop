@@ -106,5 +106,22 @@ namespace Identity.API.Services
             var result = await _userManager.ConfirmEmailAsync(user, token);
             return result;
         }
+
+        public async Task SendPasswordResetEmailAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId) ?? throw new Exception("User not found.");
+            var token = Uri.EscapeDataString(await _userManager.GeneratePasswordResetTokenAsync(user));
+            var apiUrl = Environment.GetEnvironmentVariable("API_URL");
+            var resetLink = apiUrl + "/api/auth/reset-password/" + user.Id + "/" + token;
+            await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink);
+        }
+
+        public async Task<IdentityResult> ResetPasswordAsync(string userId, string token, string newPassword)
+        {
+            token = Uri.UnescapeDataString(token);
+            var user = await _userManager.FindByIdAsync(userId) ?? throw new Exception("User not found.");
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+            return result;
+        }
     }
 }

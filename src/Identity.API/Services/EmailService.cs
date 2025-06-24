@@ -58,5 +58,18 @@ namespace Identity.API.Services
 
             await SendEmailAsync(email, subject, body);
         }
+
+        public async Task SendPasswordResetEmailAsync(string email, string resetLink)
+        {
+            string template = Path.Combine(Directory.GetCurrentDirectory(), "EmailTemplates", "ResetPasswordTemplate.html");
+            string body = File.ReadAllText(template);
+
+            var subject = "Password Reset";
+
+            body = body.Replace("{{UserEmail}}", email)
+                        .Replace("{{ResetLink}}", resetLink);
+
+            await SendEmailAsync(email, subject, body);
+        }
     }
 }

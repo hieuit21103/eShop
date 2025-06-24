@@ -1,5 +1,7 @@
+using Identity.API.Models;
 using Identity.API.Models.DTOs;
 using Identity.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Identity.API.Controllers
@@ -88,6 +90,55 @@ namespace Identity.API.Controllers
                 FullName = user.Profile?.FullName,
                 AvatarUrl = user.Profile?.AvatarUrl
             });
+        }
+
+        [HttpGet("reset-password/{userId}")]
+        [Authorize(Policy = "UserOnly")]
+        public async Task<IActionResult> ResetPassword([FromRoute] string userId)
+        {
+            if (userId == _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
+            {
+                await _authService.SendPasswordResetEmailAsync(userId);
+                return Ok(new { Message = "Password reset email sent successfully." });
+            }
+            return Unauthorized();
+        }
+
+        [HttpGet("reset-password/{userId}/{token}")]
+        [Authorize(Policy = "UserOnly")]
+        public IActionResult ResetPassword([FromRoute] string userId, [FromRoute] string token)
+        {
+            if (userId == _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
+            {
+                return Ok(new
+                {
+                    Token = token,
+                    UserId = userId
+                });
+            }
+            return Unauthorized();
+        }
+
+        [HttpPut("reset-password/{userId}/{token}")] 
+        [Authorize(Policy = "UserOnly")]
+        public async Task<IActionResult> ResetPassword([FromRoute] string userId, [FromRoute] string token, [FromBody] ResetPasswordDto resetPasswordDto)
+        {
+            if(userId != _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
+            {
+                return Unauthorized();
+            }
+            if (resetPasswordDto.Password != resetPasswordDto.ConfirmPassword)
+                {
+                    return BadRequest("Passwords do not match.");
+                }
+
+            var newPassword = resetPasswordDto.Password;
+            var result = await _authService.ResetPasswordAsync(userId, token, newPassword);
+            if (result.Succeeded)
+            {
+                return Ok(new { Message = "Password reset successfully." });
+            }
+            return BadRequest(result.Errors);
         }
     }
 }
