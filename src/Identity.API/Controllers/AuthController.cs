@@ -23,10 +23,11 @@ namespace Identity.API.Controllers
             if (!ModelState.IsValid)
             {
                 var errors = ModelState
+                    .Where(x => x.Value.Errors.Count > 0)
                     .SelectMany(x => x.Value.Errors.Select(e => new
                     {
-                        code = x.Key,
-                        description = e.ErrorMessage
+                        code = e.ErrorMessage.Split(':')[0],
+                        description = e.ErrorMessage.Split(':')[1]
                     }))
                     .ToList();
                 return BadRequest(errors);
@@ -37,12 +38,12 @@ namespace Identity.API.Controllers
             }
 
             var result = await _authService.RegisterUserAsync(registerDto);
-            if (result.Succeeded)
+            if (!result.Succeeded)
             {
-                return Ok(new { Message = "User registered successfully." });
+                var errors = result.Errors.Select(e => e.Description).ToArray();
+                return BadRequest(errors);
             }
-
-            return BadRequest(result.Errors);
+            return Ok(new { Message = "User registered successfully." });
         }
 
         [HttpGet("confirm-email/{userId}/{token}")]

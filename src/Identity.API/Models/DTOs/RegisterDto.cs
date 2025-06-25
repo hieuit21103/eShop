@@ -6,7 +6,7 @@ namespace Identity.API.Models.DTOs
     public class RegisterDto
     {
         [Required]
-        [EmailAddress(ErrorMessage = "Email is not valid.")]
+        [EmailAddress(ErrorMessage = "EmailNotValid: Email is not valid.")]
         public string Email { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }

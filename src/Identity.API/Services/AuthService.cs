@@ -3,6 +3,7 @@ using Identity.API.Models;
 using Identity.API.Models.DTOs;
 using Microsoft.AspNetCore.Identity;
 using DotNetEnv;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Identity.API.Services
 {
