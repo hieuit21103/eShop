@@ -20,6 +20,17 @@ namespace Identity.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .SelectMany(x => x.Value.Errors.Select(e => new
+                    {
+                        code = x.Key,
+                        description = e.ErrorMessage
+                    }))
+                    .ToList();
+                return BadRequest(errors);
+            }
             if (registerDto == null)
             {
                 return BadRequest("Invalid registration data.");
@@ -96,7 +107,7 @@ namespace Identity.API.Controllers
             return Ok(new { Message = "Password reset email sent successfully." });
         }
 
-        [HttpPut("reset-password/{userId}/{token}")] 
+        [HttpPut("reset-password/{userId}/{token}")]
         public async Task<IActionResult> ResetPassword([FromRoute] string userId, [FromRoute] string token, [FromBody] ResetPasswordDto resetPasswordDto)
         {
             var user = await _authService.GetUserByIdAsync(userId);
@@ -105,9 +116,9 @@ namespace Identity.API.Controllers
                 return NotFound("User not found.");
             }
             if (resetPasswordDto.Password != resetPasswordDto.ConfirmPassword)
-                {
-                    return BadRequest("Passwords do not match.");
-                }
+            {
+                return BadRequest("Passwords do not match.");
+            }
             var newPassword = resetPasswordDto.Password;
             var result = await _authService.ResetPasswordAsync(userId, token, newPassword);
             if (result.Succeeded)
