@@ -85,6 +85,17 @@ namespace Identity.API.Services
             return await _userManager.FindByNameAsync(username) ?? throw new Exception("User not found.");
         }
 
+        public async Task<ApplicationUser> GetUserByIdAsync(string userId)
+        {
+            return await _userManager.FindByIdAsync(userId) ?? throw new Exception("User not found.");
+        }
+
+        public async Task<string> GetUserIdByEmailAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception("User not found.");
+            return user.Id;
+        }
+
         public async Task<ApplicationUser> GetCurrentUserAsync()
         {
             var user = _signInManager.Context.User;
@@ -129,12 +140,6 @@ namespace Identity.API.Services
             var user = await _userManager.FindByIdAsync(userId) ?? throw new Exception("User not found.");
             var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
             return result;
-        }
-
-        internal async Task<string> GetUserIdByEmailAsync(string email)
-        {
-            var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception("User not found.");
-            return user.Id;
         }
     }
 }

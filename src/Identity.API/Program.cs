@@ -80,7 +80,6 @@ builder.Services.AddScoped<IGenericService<UserProfile>, UserProfileService>();
 
 builder.Services.AddControllers();
 
-
 var app = builder.Build();
 
 app.UseAuthentication();
