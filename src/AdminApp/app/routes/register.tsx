@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Lock, Mail, ArrowRight, User, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, ArrowRight, User, UserPlus, AlertCircle, X } from 'lucide-react';
+import { Link } from 'react-router';
+import AuthService from '../services/auth-service';
 
 const RegisterPage: React.FC = () => {
     const [email, setEmail] = useState('');
@@ -10,33 +12,39 @@ const RegisterPage: React.FC = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [acceptTerms, setAcceptTerms] = useState(false);
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
 
     const handleSubmit = async () => {
-        if (password !== confirmPassword) {
-            alert('Mật khẩu xác nhận không khớp!');
-            return;
-        }
-
-        if (!acceptTerms) {
-            alert('Vui lòng đồng ý với điều khoản dịch vụ!');
-            return;
-        }
-
         setIsLoading(true);
 
-        // Simulate API call
+        // API call
+        try {
+            await AuthService.register({ email, username, password });
+            setMessage('Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.');
+        } catch (error: unknown) {
+            if (
+                typeof error === 'object' &&
+                error !== null &&
+                'response' in error &&
+                Array.isArray((error as any).response?.data)
+            ) {
+                const firstError = (error as any).response.data[0];
+                setError(firstError?.description || 'Đăng ký thất bại! Vui lòng thử lại.');
+            } else {
+                setError('Đăng ký thất bại! Vui lòng thử lại.');
+            }
+        }
+        
         setTimeout(() => {
             setIsLoading(false);
-            fetch('http://localhost:5295/api/auth/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, username, password }),
-            })
             console.log('Register attempt:', { email, username, password });
         }, 2000);
     };
+
+    const clearError = () => {
+        setError('');
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -56,6 +64,36 @@ const RegisterPage: React.FC = () => {
 
                 {/* Register Form */}
                 <div className="mt-8 space-y-6">
+                    {/* Error Message Display */}
+                    {error && (
+                        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                                    <p className="text-sm text-red-700">{error}</p>
+                                </div>
+                                <button
+                                    onClick={clearError}
+                                    className="text-red-500 hover:text-red-700 transition-colors"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Success Message Display */}
+                    {message && (
+                        <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                            <div className="flex items-center">
+                                <div className="flex items-center">
+                                    <div className="h-5 w-5 text-green-500 mr-2">✓</div>
+                                    <p className="text-sm text-green-700">{message}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="space-y-4">
                         {/* Email Field */}
                         <div>
@@ -77,6 +115,9 @@ const RegisterPage: React.FC = () => {
                                     placeholder="Nhập địa chỉ email của bạn"
                                 />
                             </div>
+                            {!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email && (
+                                <p className="mt-1 text-sm text-red-600">Email không hợp lệ</p>
+                            )}
                         </div>
 
                         {/* Username Field */}
@@ -132,6 +173,9 @@ const RegisterPage: React.FC = () => {
                                     )}
                                 </button>
                             </div>
+                            {password && !/^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}$/.test(password) && (
+                                <p className="mt-1 text-sm text-red-600">Mật khẩu phải có ít nhất 6 ký tự, chứa ít nhất 1 ký tự đặc biệt và 1 số</p>
+                            )}
                         </div>
 
                         {/* Confirm Password Field */}
@@ -260,9 +304,9 @@ const RegisterPage: React.FC = () => {
                     <div className="text-center">
                         <p className="text-sm text-gray-600">
                             Đã có tài khoản?{' '}
-                            <a href="#" className="font-medium text-blue-600 hover:text-purple-600 transition-colors">
+                            <Link to="/login" className="font-medium text-blue-600 hover:text-purple-600 transition-colors">
                                 Đăng nhập ngay
-                            </a>
+                            </Link>
                         </p>
                     </div>
                 </div>

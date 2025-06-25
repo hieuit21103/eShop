@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useSearchParams } from "react-router";
-import { Eye, EyeOff, Lock, Mail, ArrowRight, User, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, ArrowRight, User, UserPlus, AlertCircle, X } from 'lucide-react';
 import { Link } from 'react-router';
+import AuthService from '../services/auth-service';
 
 const RegisterPage: React.FC = () => {
     const [password, setPassword] = useState('');
@@ -10,6 +11,8 @@ const RegisterPage: React.FC = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [searchParams] = useSearchParams();
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
 
     const handleSubmit = async () => {
         if (password !== confirmPassword) {
@@ -20,23 +23,37 @@ const RegisterPage: React.FC = () => {
         const userId = searchParams.get("userId");
         const token = searchParams.get("token");
         if (userId && token) {
-            // Simulate API call to confirm email
             const encodeToken = encodeURIComponent(token);
             setIsLoading(true);
-            fetch('http://localhost:5295/api/auth/reset-password' + '/' + userId + '/' + encodeToken, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ password, confirmPassword }),
-            });
-            
+
+            // API call
+            try {
+                await AuthService.resetPassword(userId, encodeToken, { password, confirmPassword });
+                setMessage('Mật khẩu đã được tạo lại thành công! Bạn có thể đăng nhập ngay bây giờ.');
+            } catch (error: unknown) {
+                if (
+                    typeof error === 'object' &&
+                    error !== null &&
+                    'response' in error &&
+                    Array.isArray((error as any).response?.data)
+                ) {
+                    const firstError = (error as any).response.data[0];
+                    setError(firstError?.description || 'Tạo mật khẩu thất bại! Vui lòng thử lại.');
+                } else {
+                    setError('Tạo mật khẩu thất bại! Vui lòng thử lại.');
+                }
+            }
+
             setTimeout(() => {
                 setIsLoading(false);
                 console.log('Register attempt:', { password, confirmPassword });
             }, 2000);
         }
     };
+
+    const clearError = () => {
+        setError('');
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -56,6 +73,36 @@ const RegisterPage: React.FC = () => {
 
                 {/* Register Form */}
                 <div className="mt-8 space-y-6">
+                    {/* Error Message Display */}
+                    {error && (
+                        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                                    <p className="text-sm text-red-700">{error}</p>
+                                </div>
+                                <button
+                                    onClick={clearError}
+                                    className="text-red-500 hover:text-red-700 transition-colors"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Success Message Display */}
+                    {message && (
+                        <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                            <div className="flex items-center">
+                                <div className="flex items-center">
+                                    <div className="h-5 w-5 text-green-500 mr-2">✓</div>
+                                    <p className="text-sm text-green-700">{message}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="space-y-4">
                         {/* Password Field */}
                         <div>
@@ -88,6 +135,9 @@ const RegisterPage: React.FC = () => {
                                     )}
                                 </button>
                             </div>
+                            {password && !/^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}$/.test(password) && (
+                                <p className="mt-1 text-sm text-red-600">Mật khẩu phải có ít nhất 6 ký tự, chứa ít nhất 1 ký tự đặc biệt và 1 số</p>
+                            )}
                         </div>
 
                         {/* Confirm Password Field */}
@@ -107,8 +157,8 @@ const RegisterPage: React.FC = () => {
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     className={`text-black block w-full pl-10 pr-12 py-3 border rounded-xl shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 ${confirmPassword && password !== confirmPassword
-                                            ? 'border-red-300 focus:ring-red-500'
-                                            : 'border-gray-300 focus:ring-blue-500'
+                                        ? 'border-red-300 focus:ring-red-500'
+                                        : 'border-gray-300 focus:ring-blue-500'
                                         }`}
                                     placeholder="Nhập lại mật khẩu"
                                 />

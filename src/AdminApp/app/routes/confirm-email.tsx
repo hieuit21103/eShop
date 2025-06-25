@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from "react-router";
 import { Mail, CheckCircle, XCircle, AlertCircle, ArrowRight, RefreshCw } from 'lucide-react';
+import AuthService from '../services/auth-service';
 
 const ConfirmEmail: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -24,19 +25,12 @@ const ConfirmEmail: React.FC = () => {
     }, [searchParams]);
 
     const confirmEmail = async (userId: string, token: string) => {
-        // Replace with actual API call
-        console.log("Confirming email for user:", userId, "with token:", token);
-        fetch(`http://localhost:5295/api/auth/confirm-email/${userId}/${token}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        }).then((response) => {
-            if (!response.ok) {
-                throw new Error("Email confirmation failed");
-            }
-            return response.json();
-        })
+        try {
+            await AuthService.confirmEmail(userId, token);
+        } catch (error) {
+            console.error("Email confirmation failed:", error);
+            throw new Error("Email confirmation failed");
+        }
     };
 
     const handleRetry = async () => {

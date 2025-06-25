@@ -1,25 +1,37 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Lock, Mail, ArrowRight, User, UserPlus, LockKeyhole, KeyIcon, KeySquare, KeyRound } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, ArrowRight, User, UserPlus, LockKeyhole, KeyIcon, KeySquare, KeyRound, AlertCircle, X } from 'lucide-react';
+import AuthService from '../services/auth-service';
+import { Link } from 'react-router';
 
 const RegisterPage: React.FC = () => {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
 
     const handleSubmit = async () => {
 
         setIsLoading(true);
 
-        // Simulate API call
-        fetch('http://localhost:5295/api/auth/forgot-password/' + email, {   
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        })
+        // API call
+        try {
+            await AuthService.sendForgotPasswordEmail(email);
+            setMessage('Email đặt lại mật khẩu đã được gửi thành công!');
+            setError('');
+        } catch (err) {
+            setError('Có lỗi xảy ra khi gửi email đặt lại mật khẩu. Vui lòng thử lại.');
+            setMessage('');
+        } finally {
+            setIsLoading(false);
+        }
+        
         setTimeout(() => {
             setIsLoading(false);
-            //   console.log('Register attempt:', { email, username, password });
         }, 2000);
+    };
+
+    const clearError = () => {
+        setError('');
     };
 
     return (
@@ -40,6 +52,36 @@ const RegisterPage: React.FC = () => {
 
                 {/* Register Form */}
                 <div className="mt-8 space-y-6">
+                    {/* Error Message Display */}
+                    {error && (
+                        <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center">
+                                    <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                                    <p className="text-sm text-red-700">{error}</p>
+                                </div>
+                                <button
+                                    onClick={clearError}
+                                    className="text-red-500 hover:text-red-700 transition-colors"
+                                >
+                                    <X className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Success Message Display */}
+                    {message && (
+                        <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                            <div className="flex items-center">
+                                <div className="flex items-center">
+                                    <div className="h-5 w-5 text-green-500 mr-2">✓</div>
+                                    <p className="text-sm text-green-700">{message}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     <div className="space-y-4">
                         {/* Email Field */}
                         <div>
@@ -61,6 +103,9 @@ const RegisterPage: React.FC = () => {
                                     placeholder="Nhập địa chỉ email của bạn"
                                 />
                             </div>
+                            {!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email && (
+                                <p className="mt-1 text-sm text-red-600">Email không hợp lệ</p>
+                            )}
                         </div>
 
                         {/* Submit Button */}
@@ -89,9 +134,9 @@ const RegisterPage: React.FC = () => {
                         <div className="text-center">
                             <p className="text-sm text-gray-600">
                                 Đã có tài khoản?{' '}
-                                <a href="#" className="font-medium text-blue-600 hover:text-purple-600 transition-colors">
+                                <Link to="/login"  className="font-medium text-blue-600 hover:text-purple-600 transition-colors">
                                     Đăng nhập ngay
-                                </a>
+                                </Link>
                             </p>
                         </div>
                     </div>
