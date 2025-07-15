@@ -6,9 +6,18 @@ public static class Extensions
     {
         builder.AddDefaultAuthentication();
 
-        builder.AddRedisClient("redis");
-
-        
-
+        builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+        {
+            var configuration = Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING");
+            try
+            {
+                var multiplexer = ConnectionMultiplexer.Connect(configuration);
+                return multiplexer;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Could not connect to Redis", ex);
+            }
+        });
     }
 }
