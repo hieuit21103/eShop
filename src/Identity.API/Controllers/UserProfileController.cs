@@ -21,7 +21,9 @@ namespace Identity.API.Controllers
         [Authorize(Policy = "UserOnly")]
         public IActionResult GetUserProfile(string userId)
         {
-            if (userId == _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
+            var jwtToken = Request.Cookies["JWT"] ?? "null";
+            if (jwtToken == "null") return Unauthorized();
+            if (userId == _jwtService.GetIdFromToken(jwtToken))
             {
                 var userProfile = _service.GetByUserId(userId);
                 return Ok(userProfile);
@@ -33,7 +35,9 @@ namespace Identity.API.Controllers
         [Authorize(Policy = "UserOnly")]
         public IActionResult UpdateUserProfile([FromRoute] string userId, [FromBody] UserProfile entity)
         {
-            if (userId == _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
+            var jwtToken = Request.Cookies["JWT"] ?? "null";
+            if (jwtToken == "null") return Unauthorized();
+            if (userId == _jwtService.GetIdFromToken(jwtToken))
             {
                 entity.UserId = userId;
                 _service.Update(entity);

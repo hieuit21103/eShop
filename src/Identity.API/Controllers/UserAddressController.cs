@@ -21,19 +21,23 @@ namespace Identity.API.Controllers
         [Authorize(Policy = "UserOnly")]
         public IActionResult GetUserAddresses(string userId)
         {
-            if (userId == _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
-            {
-                var userAddresses = _service.GetByUserId(userId);
-                return Ok(userAddresses);
-            }
-            return Unauthorized();
+            var jwtToken = Request.Cookies["JWT"] ?? "null";
+            if (jwtToken == "null") return Unauthorized("JWT token is missing or invalid.");
+            if (userId == _jwtService.GetIdFromToken(jwtToken))
+                {
+                    var userAddresses = _service.GetByUserId(userId);
+                    return Ok(userAddresses);
+                }
+            return Unauthorized("Unauthorized access to user addresses.");
         }
 
         [HttpPost("user/{userId}")]
         [Authorize(Policy = "UserOnly")]
         public IActionResult AddUserAddress([FromRoute] string userId, [FromBody] UserAddress entity)
         {
-            if (userId == _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
+            var jwtToken = Request.Cookies["JWT"] ?? "null";
+            if (jwtToken == "null") return Unauthorized();
+            if (userId == _jwtService.GetIdFromToken(jwtToken))
             {
                 entity.UserId = userId;
                 _service.Add(entity);
@@ -46,7 +50,9 @@ namespace Identity.API.Controllers
         [Authorize(Policy = "UserOnly")]
         public IActionResult UpdateUserAddress([FromRoute] string userId, [FromRoute] Guid id, [FromBody] UserAddress entity)
         {
-            if (userId == _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
+            var jwtToken = Request.Cookies["JWT"] ?? "null";
+            if (jwtToken == "null") return Unauthorized();
+            if (userId == _jwtService.GetIdFromToken(jwtToken))
             {
                 entity.UserId = userId;
                 _service.Update(entity);
@@ -59,7 +65,9 @@ namespace Identity.API.Controllers
         [Authorize(Policy = "UserOnly")]
         public IActionResult DeleteUserAddress([FromRoute] string userId, [FromRoute] Guid id)
         {
-            if (userId == _jwtService.GetIdFromToken(Request.Headers["Authorization"].ToString().Replace("Bearer ", "")))
+            var jwtToken = Request.Cookies["JWT"] ?? "null";
+            if (jwtToken == "null") return Unauthorized();
+            if (userId == _jwtService.GetIdFromToken(jwtToken))
             {
                 _service.Delete(id);
                 return NoContent();

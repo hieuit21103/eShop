@@ -31,7 +31,11 @@ class AuthService {
 
     async login(payload: LoginPayload): Promise<{ status: number, token: string }> {
         console.log('${AUTH_API_URL}/login)');
-        const response = await axios.post(`${AUTH_API_URL}/login`, payload);
+        const response = await axios.post(`${AUTH_API_URL}/login`, payload ,
+            {
+                withCredentials: true,
+            }
+        );
         return {status: response.status, token: response.data.Token}; // Assuming the response contains a Token field
     }
 

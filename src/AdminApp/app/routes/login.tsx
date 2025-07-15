@@ -18,7 +18,6 @@ const LoginPage: React.FC = () => {
 
         try {
             const response = await AuthService.login({ username, password });
-            localStorage.setItem('authToken', response.token);
             if (response.status != 200) {
                 setError('Đăng nhập thất bại');
             } else {
