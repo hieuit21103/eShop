@@ -4,6 +4,7 @@ using Identity.API.Models.DTOs;
 using Microsoft.AspNetCore.Identity;
 using DotNetEnv;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.VisualBasic;
 
 namespace Identity.API.Services
 {
@@ -54,26 +55,21 @@ namespace Identity.API.Services
             }
         }
 
-        public async Task<SignInResult> SignInUserAsync(LoginDto loginDto)
+        public async Task<ApplicationUser?> SignInUserAsync(LoginDto loginDto)
         {
             var existingUser = await _userManager.FindByNameAsync(loginDto.Username);
             if (existingUser == null)
             {
-                return SignInResult.Failed;
+                return null;
             }
 
             if (!await _userManager.IsEmailConfirmedAsync(existingUser))
             {
-                return SignInResult.NotAllowed;
+                return null;
             }
 
-            var result = await _signInManager.PasswordSignInAsync(
-                existingUser.UserName,
-                loginDto.Password,
-                isPersistent: false,
-                lockoutOnFailure: false
-            );
-            return result;
+            var isPasswordValid = await _userManager.CheckPasswordAsync(existingUser, loginDto.Password);
+            return isPasswordValid ? existingUser : null;
         }
 
         public async Task SignOutUserAsync()

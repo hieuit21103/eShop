@@ -66,20 +66,28 @@ namespace Identity.API.Controllers
                 return BadRequest("Invalid login data.");
             }
 
-            var result = await _authService.SignInUserAsync(loginDto);
-            if (result.Succeeded)
+            var user = await _authService.SignInUserAsync(loginDto);
+            if (user == null)
             {
-                var user = await _authService.GetUserByUsernameAsync(loginDto.Username);
-                var token = _jwtService.GenerateToken(user);
-                return Ok(new { Token = token });
+                return Unauthorized("Invalid username or password.");
             }
-            return Unauthorized("Invalid username or password.");
+            
+            var token = await _jwtService.GenerateToken(user);
+            Response.Cookies.Append("JWT", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.None,
+                Expires = DateTimeOffset.UtcNow.AddHours(1)
+            });
+            return Ok();
         }
 
         [HttpPost("logout")]
         public async Task<IActionResult> Logout()
         {
             await _authService.SignOutUserAsync();
+            Response.Cookies.Delete("JWT");
             return Ok(new { Message = "User logged out successfully." });
         }
 
