@@ -1,10 +1,103 @@
-using eShop.Identity.API.Extensions;
 using Identity.API.Data;
+using Identity.API.Models;
 using Identity.API.Seeders;
+using Identity.API.Services;
+using Identity.API.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.EntityFrameworkCore;
+using Identity.API.Models.DTOs;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.AddApplicationServices();
+DotNetEnv.Env.Load();
+DotNetEnv.Env.TraversePath().Load();
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.WithOrigins("localhost", "https://localhost:5001")
+                  .AllowCredentials()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
+
+builder.Services.AddOpenApi();
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    var host = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
+    var port = Environment.GetEnvironmentVariable("DB_PORT") ?? "3306";
+    var database = Environment.GetEnvironmentVariable("DB_NAME") ?? "identitydb";
+    var user = Environment.GetEnvironmentVariable("DB_USER") ?? "root";
+    var password = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "password";
+    var connectionString = $"server={host};port={port};database={database};user={user};password={password};";
+    options.UseMySql(
+        connectionString,
+        ServerVersion.AutoDetect(connectionString));
+});
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(option => option.SignIn.RequireConfirmedAccount = false)
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "localhost",
+        ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "localhost",
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY") ?? "your-secret-key-here-change-this-in-production"))
+    };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            if (context.Request.Cookies.TryGetValue("JWT", out var cookieToken))
+            {
+                context.Token = cookieToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("User", "Admin"));
+});
+
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<JwtService>();
+
+builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<IGenericService<ApplicationUser>, ApplicationUserService>();
+builder.Services.AddScoped<IGenericService<UserAddress>, UserAddressService>();
+builder.Services.AddScoped<IGenericService<UserProfile>, UserProfileService>();
+
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -19,7 +112,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 app.MapControllers();
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 using (var scope = app.Services.CreateScope())
 {
