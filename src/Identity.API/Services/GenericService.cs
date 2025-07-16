@@ -1,11 +1,3 @@
-using Identity.API.Data;
-using Identity.API.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-
-
 namespace Identity.API.Services
 {
     public abstract class GenericService<T> : IGenericService<T> where T : class

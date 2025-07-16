@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-using Identity.API.Models;
-
 namespace Identity.API.Seeders
 {
     public static class SeedUserRole

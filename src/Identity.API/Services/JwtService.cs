@@ -1,11 +1,3 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.Identity;
-using Identity.API.Models;
-using Identity.API.Services.Interfaces;
-
 namespace Identity.API.Services
 {
     public class JwtService

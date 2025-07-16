@@ -1,7 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
-using Identity.API.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-
 namespace Identity.API.Controllers
 {
     [ApiController]

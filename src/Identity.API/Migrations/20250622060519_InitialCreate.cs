@@ -1,10 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
-
-#nullable disable
-
-namespace Identity.API.Migrations
+﻿namespace Identity.API.Migrations
 {
     /// <inheritdoc />
     public partial class InitialCreate : Migration

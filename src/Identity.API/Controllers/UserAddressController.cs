@@ -1,10 +1,3 @@
-using Identity.API.Services.Interfaces;
-using Identity.API.Services;
-using Identity.API.Models;
-using Identity.API.Models.DTOs;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
 namespace Identity.API.Controllers
 {
     public class UserAddressController : BaseController<UserAddress>

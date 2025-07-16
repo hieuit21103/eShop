@@ -1,7 +1,3 @@
-using Identity.API.Models.DTOs;
-using Identity.API.Services;
-using Microsoft.AspNetCore.Mvc;
-
 namespace Identity.API.Controllers
 {
     [ApiController]

@@ -1,0 +1,24 @@
+global using DotNetEnv;
+global using Identity.API.Data;
+global using Identity.API.Models;
+global using Identity.API.Models.DTOs;
+global using Identity.API.Seeders;
+global using Identity.API.Services;
+global using Identity.API.Services.Interfaces;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.Identity;
+global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Metadata;
+global using Microsoft.EntityFrameworkCore.Migrations;
+global using Microsoft.IdentityModel.Tokens;
+global using System.ComponentModel.DataAnnotations;
+global using System.ComponentModel.DataAnnotations.Schema;
+global using System.IdentityModel.Tokens.Jwt;
+global using System.Net;
+global using System.Net.Mail;
+global using System.Security.Claims;
+global using System.Text;
+

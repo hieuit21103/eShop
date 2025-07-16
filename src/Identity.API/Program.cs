@@ -1,26 +1,10 @@
-using Identity.API.Data;
-using Identity.API.Models;
-using Identity.API.Seeders;
-using Identity.API.Services;
-using Identity.API.Services.Interfaces;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
-using Identity.API.Models.DTOs;
-using Microsoft.AspNetCore.Mvc;
-
 var builder = WebApplication.CreateBuilder(args);
 
+//Load environment variables from .env file
 DotNetEnv.Env.Load();
 DotNetEnv.Env.TraversePath().Load();
 
-builder.Services.Configure<ApiBehaviorOptions>(options =>
-{
-    options.SuppressModelStateInvalidFilter = true;
-});
-
+// Add CORS policy
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -33,8 +17,10 @@ builder.Services.AddCors(options =>
         });
 });
 
+// Add OpenAPI support
 builder.Services.AddOpenApi();
 
+// Add ApplicationDbContext with MySQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     var host = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
@@ -48,10 +34,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         ServerVersion.AutoDetect(connectionString));
 });
 
+// Add Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(option => option.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+// Add JWT authentication
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -83,12 +71,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Add custom Authorization policies
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
     options.AddPolicy("UserOnly", policy => policy.RequireRole("User", "Admin"));
 });
 
+// Register services
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<JwtService>();
 
@@ -97,6 +87,7 @@ builder.Services.AddScoped<IGenericService<ApplicationUser>, ApplicationUserServ
 builder.Services.AddScoped<IGenericService<UserAddress>, UserAddressService>();
 builder.Services.AddScoped<IGenericService<UserProfile>, UserProfileService>();
 
+// Register controllers
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -112,8 +103,9 @@ if (app.Environment.IsDevelopment())
 app.UseCors("AllowAll");
 app.MapControllers();
 
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
+// Seed the database with initial data
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace Identity.API.Models.DTOs
 {
     public class LoginDto

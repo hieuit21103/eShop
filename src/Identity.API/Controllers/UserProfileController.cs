@@ -1,9 +1,3 @@
-using Identity.API.Models;
-using Identity.API.Services;
-using Identity.API.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-
 namespace Identity.API.Controllers
 {
     public class UserProfileController : BaseController<UserProfile>
