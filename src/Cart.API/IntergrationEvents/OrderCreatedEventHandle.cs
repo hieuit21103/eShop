@@ -1,14 +1,8 @@
 namespace Cart.API.IntergrationEvents;
-public class OrderCreatedEventHandle : IIntegrationEventHandler<OrderCreatedEvent>
+public class OrderCreatedEventHandle(ICartService cartService, ILogger<OrderCreatedEventHandle> logger) : IIntegrationEventHandler<OrderCreatedEvent>
 {
-    private readonly ICartService _cartService;
-    private readonly ILogger<OrderCreatedEventHandle> _logger;
-
-    public OrderCreatedEventHandle(ICartService cartService, ILogger<OrderCreatedEventHandle> logger)
-    {
-        _cartService = cartService;
-        _logger = logger;
-    }
+    private readonly ICartService _cartService = cartService;
+    private readonly ILogger<OrderCreatedEventHandle> _logger = logger;
 
     public async Task Handle(OrderCreatedEvent @event, CancellationToken cancellationToken)
     {
