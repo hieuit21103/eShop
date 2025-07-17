@@ -5,9 +5,9 @@ public class HttpProductService(ILogger<HttpProductService> logger, HttpClient h
     private readonly ILogger<HttpProductService> _logger = logger;
     private readonly HttpClient _httpClient = httpClient;
 
-    public async Task<ProductDto?> GetProductByIdAsync(Guid productId)
+    public async Task<ProductDto?> GetProductByIdAsync(string productId)
     {
-        var response = await _httpClient.GetAsync($"api/products/{productId}");
+        var response = await _httpClient.GetAsync($"api/product/{productId}");
         if (response.IsSuccessStatusCode)
         {
             var product = await response.Content.ReadAsStringAsync();

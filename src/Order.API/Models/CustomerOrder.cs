@@ -1,5 +1,5 @@
 namespace Order.API.Models;
-public class Order
+public class CustomerOrder
 {
     public Guid Id { get; set; }
     public string UserId { get; set; }

@@ -1,0 +1,24 @@
+global using DotNetEnv;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.IdentityModel.Tokens;
+global using Order.API.Controllers;
+global using Order.API.Infrastructure.Data;
+global using Order.API.Models;
+global using Order.API.Models.DTOs;
+global using Order.API.Services;
+global using System;
+global using System.Collections.Generic;
+global using System.ComponentModel.DataAnnotations;
+global using System.ComponentModel.DataAnnotations.Schema;
+global using System.IdentityModel.Tokens.Jwt;
+global using System.Security.Claims;
+global using System.Text;
+global using System.Text.Json;
+global using System.Text.Json.Serialization;
+global using System.Threading.Tasks;
+global using EventBusRabbitMQ;
+

@@ -2,5 +2,5 @@ namespace Order.API.Services;
 
 public interface IProductService
 {
-    Task<Product> GetProductByIdAsync(Guid productId);
+    Task<ProductDto> GetProductByIdAsync(string productId);
 }
