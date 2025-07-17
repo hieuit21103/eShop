@@ -12,11 +12,18 @@ public class Product : IEntity
     public int StockQuantity { get; set; }
     public Guid CategoryId { get; set; }
     public Guid BrandId { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = GetVietnamTimeNow();
+    public DateTime UpdatedAt { get; set; } = GetVietnamTimeNow();
 
     [ForeignKey("CategoryId")]
-    public Category Category { get; set; }
+    public Category? Category { get; set; }
     [ForeignKey("BrandId")]
-    public Brand Brand { get; set; }
+    public Brand? Brand { get; set; }
+    public ICollection<ProductImages> ProductImages { get; set; } = new List<ProductImages>();
+
+    private static DateTime GetVietnamTimeNow()
+    {
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
+    }
 }
