@@ -9,7 +9,7 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 ARG configuration=Release
 WORKDIR /src
 COPY ["src/Catalog.API/Catalog.API.csproj", "src/Catalog.API/"]
-RUN dotnet restore "Catalog.API\Catalog.API.csproj"
+RUN dotnet restore "src\Catalog.API\Catalog.API.csproj"
 COPY . .
 WORKDIR "/src/Catalog.API"
 RUN dotnet build "Catalog.API.csproj" -c $configuration -o /app/build
