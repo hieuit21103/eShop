@@ -4,6 +4,9 @@ var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
 DotNetEnv.Env.TraversePath().Load();
 
+// Add EventBusRabbitMQ
+builder.Services.AddEventBus();
+
 // Add CORS policy
 builder.Services.AddCors(options =>
 {
@@ -88,11 +91,16 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseEventBus(bus =>
+{
+    bus.Subscribe<OrderCreatedEvent, OrderCreatedEventHandler>();
+});
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.Run();
