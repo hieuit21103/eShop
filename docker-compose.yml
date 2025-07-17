@@ -1,0 +1,35 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
+
+services:
+  cartapi:
+    image: cartapi 
+    build:
+      context: .
+      dockerfile: src/Cart.API/Dockerfile
+    ports:
+      - 5001:80
+      - 5501:443
+  catalogapi:
+    image: catalogapi
+    build:
+      context: .
+      dockerfile: src/Catalog.API/Dockerfile
+    ports:
+      - 5002:80
+      - 5502:443
+  identityapi:
+    image: identityapi
+    build:
+      context: .
+      dockerfile: src/Identity.API/Dockerfile
+    ports:
+      - 5003:80
+      - 5503:443
+  orderapi:
+    image: orderapi
+    build:
+      context: .
+      dockerfile: src/Order.API/Dockerfile
+    ports:
+      - 5004:80
+      - 5504:443
