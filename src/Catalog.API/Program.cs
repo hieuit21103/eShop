@@ -4,9 +4,6 @@ var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
 DotNetEnv.Env.TraversePath().Load();
 
-// Add EventBusRabbitMQ
-builder.Services.AddEventBus();
-
 // Add CORS policy
 builder.Services.AddCors(options =>
 {
@@ -78,14 +75,24 @@ builder.Services.AddAuthorization(options =>
 
 // Add services
 builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
+builder.Services.AddScoped<IIntegrationEventHandler<OrderCreatedEvent>, OrderCreatedEventHandler>();
 
 builder.Services.AddControllers();
+
+// Add EventBusRabbitMQ
+builder.Services.AddEventBus();
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
+
+    // Kiểm tra tất cả registered services
+    var allServices = builder.Services.Select(x => x.ServiceType.Name).ToList();
+    Console.WriteLine($"All registered services: {string.Join(", ", allServices)}");
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
+
 }
 
 // Use CORS policy
@@ -97,10 +104,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Services.UseEventBus(bus =>
-{
-    bus.SubscribeAsync<OrderCreatedEvent, OrderCreatedEventHandler>();
-});
+var eventBus = app.Services.GetRequiredService<IEventBus>();
+await eventBus.SubscribeAsync<OrderCreatedEvent, OrderCreatedEventHandler>();
 
 if (app.Environment.IsDevelopment())
 {

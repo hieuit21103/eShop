@@ -26,7 +26,7 @@ public class EventBusRabbitMQ : IEventBus, IAsyncDisposable
         var factory = new ConnectionFactory()
         {
             HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "rabbitmq",
-            Port = int.Parse(Environment.GetEnvironmentVariable("RABBITMQ_PORT") ?? "5672") ,
+            Port = int.Parse(Environment.GetEnvironmentVariable("RABBITMQ_PORT") ?? "5672"),
             UserName = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME") ?? "guest",
             Password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? "guest"
         };
@@ -54,8 +54,8 @@ public class EventBusRabbitMQ : IEventBus, IAsyncDisposable
             var body = Encoding.UTF8.GetBytes(json);
 
             await _channel.BasicPublishAsync(
-                exchange: "eshop_eventbus", 
-                routingKey: eventName, 
+                exchange: "eshop_eventbus",
+                routingKey: eventName,
                 body: body);
 
             _logger.LogInformation("Published event {EventName} with ID {EventId}", eventName, @event.Id);
@@ -79,15 +79,15 @@ public class EventBusRabbitMQ : IEventBus, IAsyncDisposable
             var eventName = typeof(TEvent).Name;
 
             await _channel.QueueDeclareAsync(
-                queue: eventName, 
-                durable: true, 
-                exclusive: false, 
-                autoDelete: false, 
+                queue: eventName,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
                 arguments: null);
-                
+
             await _channel.QueueBindAsync(
-                queue: eventName, 
-                exchange: "eshop_eventbus", 
+                queue: eventName,
+                exchange: "eshop_eventbus",
                 routingKey: eventName);
 
             var consumer = new AsyncEventingBasicConsumer(_channel);
@@ -98,7 +98,7 @@ public class EventBusRabbitMQ : IEventBus, IAsyncDisposable
                 {
                     var json = Encoding.UTF8.GetString(ea.Body.ToArray());
                     var @event = JsonSerializer.Deserialize<TEvent>(json);
-                    
+
                     if (@event == null)
                     {
                         _logger.LogWarning("Failed to deserialize event {EventName}", eventName);
@@ -106,7 +106,7 @@ public class EventBusRabbitMQ : IEventBus, IAsyncDisposable
                         return;
                     }
 
-                    using var scope = _serviceProvider.CreateScope();
+                    using var scope = _serviceProvider.GetRequiredService<IServiceScopeFactory>().CreateScope();
                     var handler = scope.ServiceProvider.GetRequiredService<THandler>();
                     await handler.Handle(@event);
 
@@ -121,7 +121,7 @@ public class EventBusRabbitMQ : IEventBus, IAsyncDisposable
             };
 
             await _channel.BasicConsumeAsync(
-                queue: eventName, 
+                queue: eventName,
                 autoAck: false, // Manual acknowledgment
                 consumer: consumer);
 
@@ -152,7 +152,7 @@ public class EventBusRabbitMQ : IEventBus, IAsyncDisposable
 
             if (_channel != null)
                 await _channel.DisposeAsync();
-                
+
             if (_connection != null)
                 await _connection.DisposeAsync();
         }
@@ -162,7 +162,7 @@ public class EventBusRabbitMQ : IEventBus, IAsyncDisposable
             _semaphore.Dispose();
         }
     }
-    
+
     public void Dispose()
     {
         DisposeAsync().GetAwaiter().GetResult();

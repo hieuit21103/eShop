@@ -15,7 +15,5 @@ global using Microsoft.Extensions.Logging;
 global using System.Threading.Tasks;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.IdentityModel.Tokens;
-global using System.IdentityModel.Tokens.Jwt;
-global using DotNetEnv;
 global using EventBusRabbitMQ;
 global using Shared.Event;
