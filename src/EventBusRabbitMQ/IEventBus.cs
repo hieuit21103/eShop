@@ -2,8 +2,8 @@ namespace EventBusRabbitMQ;
 
 public interface IEventBus
 {
-    void Publish(IntegrationEvent @event);
-    void Subscribe<TEvent, THandler>()
+    Task PublishAsync(IntegrationEvent @event);
+    Task SubscribeAsync<TEvent, THandler>()
         where TEvent : IntegrationEvent
         where THandler : IIntegrationEventHandler<TEvent>;
 }

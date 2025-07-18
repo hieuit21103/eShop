@@ -3,10 +3,12 @@ namespace Identity.API.Services
 
     public class EmailService : IEmailService
     {
-        public EmailService()
+        private readonly ILogger<EmailService> _logger;
+        public EmailService(ILogger<EmailService> logger)
         {
             Env.Load();
             Env.TraversePath().Load();
+            _logger = logger;
         }
 
         public async Task SendEmailAsync(string email, string subject, string message)
@@ -46,11 +48,12 @@ namespace Identity.API.Services
             string template = Path.Combine(Directory.GetCurrentDirectory(), "EmailTemplates", "ConfirmEmailTemplate.html");
             string body = File.ReadAllText(template);
 
+
             var subject = "Email Confirmation";
 
             body = body.Replace("{{UserEmail}}", email)
                         .Replace("{{ConfirmLink}}", confirmationLink);
-
+            
             await SendEmailAsync(email, subject, body);
         }
 

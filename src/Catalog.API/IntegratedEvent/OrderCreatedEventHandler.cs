@@ -20,10 +20,10 @@ public class OrderCreatedEventHandler : IIntegrationEventHandler<OrderCreatedEve
             foreach (var item in @event.Items)
             {
                 var product = await _genericService.GetByIdAsync(item.ProductId);
-                product.Stock -= item.Quantity;
+                product.StockQuantity -= item.Quantity;
                 var success = await _genericService.UpdateAsync(product);
                 
-                if (!success)
+                if (success == null)
                 {
                     _logger.LogError("Failed to reduce stock for Product {ProductId}, Quantity {Quantity}", 
                         item.ProductId, item.Quantity);

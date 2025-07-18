@@ -1,14 +1,49 @@
 # Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP.NET Core service.
 
 services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672" # port AMQP
+      - "15672:15672" # web UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
   cartapi:
-    image: cartapi 
+    image: cartapi
     build:
       context: .
       dockerfile: src/Cart.API/Dockerfile
     ports:
       - 5001:80
       - 5501:443
+    environment:
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - redis
   catalogapi:
     image: catalogapi
     build:
@@ -17,6 +52,18 @@ services:
     ports:
       - 5002:80
       - 5502:443
+    environment:
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_DATABASE: catalogdb
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - mysql
+      - rabbitmq
   identityapi:
     image: identityapi
     build:
@@ -25,6 +72,17 @@ services:
     ports:
       - 5003:80
       - 5503:443
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_DATABASE: identitydb
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      SMTP_SERVER: ${SMTP_SERVER}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USERNAME: ${SMTP_USERNAME}
+      SMTP_PASSWORD: ${SMTP_PASSWORD}
+    depends_on:
+      - mysql
   orderapi:
     image: orderapi
     build:
@@ -33,3 +91,20 @@ services:
     ports:
       - 5004:80
       - 5504:443
+    environment:
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_DATABASE: orderdb
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      - mysql
+      - rabbitmq
+
+volumes:
+  mysql_data:
+  redis_data:
+  rabbitmq_data:

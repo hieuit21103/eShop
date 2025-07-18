@@ -11,12 +11,12 @@ WORKDIR /src
 COPY ["src/Order.API/Order.API.csproj", "src/Order.API/"]
 RUN dotnet restore "src\Order.API\Order.API.csproj"
 COPY . .
-WORKDIR "/src/Order.API"
-RUN dotnet build "Order.API.csproj" -c $configuration -o /app/build
+WORKDIR /src
+RUN dotnet build "src\Order.API\Order.API.csproj" -c $configuration -o /app/build
 
 FROM build AS publish
 ARG configuration=Release
-RUN dotnet publish "Order.API.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "src\Order.API\Order.API.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

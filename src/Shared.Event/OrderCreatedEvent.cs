@@ -6,5 +6,12 @@ public class OrderCreatedEvent : IntegrationEvent
     public string UserId { get; set; }
     public string Status { get; set; }
     public decimal TotalPrice { get; set; }
-    public List<OrderItem> Items { get; set; }
+    public List<SharedOrderItem> Items { get; set; } = new List<SharedOrderItem>();
 }
+
+public class SharedOrderItem
+{
+    public Guid ProductId { get; set; }
+    public int Quantity { get; set; }
+}
+

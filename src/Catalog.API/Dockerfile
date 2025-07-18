@@ -11,12 +11,12 @@ WORKDIR /src
 COPY ["src/Catalog.API/Catalog.API.csproj", "src/Catalog.API/"]
 RUN dotnet restore "src\Catalog.API\Catalog.API.csproj"
 COPY . .
-WORKDIR "/src/Catalog.API"
-RUN dotnet build "Catalog.API.csproj" -c $configuration -o /app/build
+WORKDIR /src
+RUN dotnet build "src\Catalog.API\Catalog.API.csproj" -c $configuration -o /app/build
 
 FROM build AS publish
 ARG configuration=Release
-RUN dotnet publish "Catalog.API.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "src\Catalog.API\Catalog.API.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

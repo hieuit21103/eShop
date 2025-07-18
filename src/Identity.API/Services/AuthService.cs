@@ -3,13 +3,15 @@ namespace Identity.API.Services
 
     public class AuthService
     {
+        private readonly ILogger<AuthService> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly EmailService _emailService;
         private readonly ApplicationDbContext _context;
 
-        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, EmailService emailService, ApplicationDbContext context)
+        public AuthService(ILogger<AuthService> logger, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, EmailService emailService, ApplicationDbContext context)
         {
+            _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
             _context = context;
@@ -38,6 +40,7 @@ namespace Identity.API.Services
             if (result.Succeeded)
             {
                 await SendConfirmationEmailAsync(user.Id);
+                _logger.LogInformation("User registered successfully.");
                 await _userManager.AddToRoleAsync(user, "User");
                 return result;
             }
@@ -99,9 +102,9 @@ namespace Identity.API.Services
 
         public async Task SendConfirmationEmailAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId) ?? throw new Exception("User not found.");
+            var user = await _userManager.FindByIdAsync(userId);
             var token = Uri.EscapeDataString(await _userManager.GenerateEmailConfirmationTokenAsync(user));
-            var url = Environment.GetEnvironmentVariable("URL");
+            var url = Environment.GetEnvironmentVariable("URL") ?? "";
             var confirmLink = url + "/confirm-email?userId=" + user.Id + "&token=" + token;
             await _emailService.SendConfirmationEmailAsync(user.Email, confirmLink);
         }

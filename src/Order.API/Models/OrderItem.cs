@@ -4,7 +4,7 @@ public class OrderItem
 {
     public Guid Id { get; set; }
     public Guid OrderId { get; set; }
-    public string ProductId { get; set; }
+    public Guid ProductId { get; set; }
     public string Name { get; set; }
     public decimal UnitPrice { get; set; }
     public int Quantity { get; set; }
@@ -13,7 +13,7 @@ public class OrderItem
     [JsonIgnore]
     public CustomerOrder Order { get; set; }
     
-    public OrderItem(Guid id, Guid orderId, string productId, string name, decimal unitPrice, int quantity)
+    public OrderItem(Guid id, Guid orderId, Guid productId, string name, decimal unitPrice, int quantity)
     {
         Id = id;
         OrderId = orderId;

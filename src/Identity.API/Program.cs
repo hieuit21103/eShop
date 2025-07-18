@@ -23,11 +23,11 @@ builder.Services.AddOpenApi();
 // Add ApplicationDbContext with MySQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    var host = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
+    var host = Environment.GetEnvironmentVariable("DB_HOST");
     var port = Environment.GetEnvironmentVariable("DB_PORT") ?? "3306";
-    var database = Environment.GetEnvironmentVariable("DB_NAME") ?? "identitydb";
-    var user = Environment.GetEnvironmentVariable("DB_USER") ?? "root";
-    var password = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "password";
+    var database = Environment.GetEnvironmentVariable("DB_DATABASE");
+    var user = Environment.GetEnvironmentVariable("DB_USERNAME");
+    var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
     var connectionString = $"server={host};port={port};database={database};user={user};password={password};";
     options.UseMySql(
         connectionString,
@@ -91,6 +91,12 @@ builder.Services.AddScoped<IGenericService<UserProfile>, UserProfileService>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

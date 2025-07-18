@@ -11,12 +11,12 @@ WORKDIR /src
 COPY ["src/Identity.API/Identity.API.csproj", "src/Identity.API/"]
 RUN dotnet restore "src\Identity.API\Identity.API.csproj"
 COPY . .
-WORKDIR "/src/Identity.API"
-RUN dotnet build "Identity.API.csproj" -c $configuration -o /app/build
+WORKDIR /src
+RUN dotnet build "src\Identity.API\Identity.API.csproj" -c $configuration -o /app/build
 
 FROM build AS publish
 ARG configuration=Release
-RUN dotnet publish "Identity.API.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "src\Identity.API\Identity.API.csproj" -c $configuration -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

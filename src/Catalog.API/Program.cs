@@ -27,7 +27,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     var host = Environment.GetEnvironmentVariable("DB_HOST");
-    var port = Environment.GetEnvironmentVariable("DB_PORT");
+    var port = Environment.GetEnvironmentVariable("DB_PORT") ?? "3306";
     var database = Environment.GetEnvironmentVariable("DB_DATABASE");
     var user = Environment.GetEnvironmentVariable("DB_USERNAME");
     var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
@@ -91,9 +91,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseEventBus(bus =>
+app.Services.UseEventBus(bus =>
 {
-    bus.Subscribe<OrderCreatedEvent, OrderCreatedEventHandler>();
+    bus.SubscribeAsync<OrderCreatedEvent, OrderCreatedEventHandler>();
 });
 
 if (app.Environment.IsDevelopment())

@@ -65,7 +65,10 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
-    var configuration = ConfigurationOptions.Parse(Environment.GetEnvironmentVariable("REDIS_CONNECTION_STRING") ?? "localhost:6379");
+    var configuration = ConfigurationOptions.Parse(
+        Environment.GetEnvironmentVariable("REDIS_HOST")+":"+
+        Environment.GetEnvironmentVariable("REDIS_PORT")+",password="+
+        Environment.GetEnvironmentVariable("REDIS_PASSWORD"));
     return ConnectionMultiplexer.Connect(configuration);
 });
 builder.Services.AddScoped<ILogger<CartService>, Logger<CartService>>();

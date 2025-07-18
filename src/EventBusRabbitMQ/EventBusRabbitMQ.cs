@@ -20,12 +20,13 @@ public class EventBusRabbitMQ : IEventBus, IAsyncDisposable
 
     public static async Task<EventBusRabbitMQ> CreateAsync(IServiceProvider serviceProvider)
     {
+        Env.Load();
         Env.TraversePath().Load();
 
         var factory = new ConnectionFactory()
         {
-            HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "localhost",
-            Port = int.Parse(Environment.GetEnvironmentVariable("RABBITMQ_PORT") ?? "5672"),
+            HostName = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "rabbitmq",
+            Port = int.Parse(Environment.GetEnvironmentVariable("RABBITMQ_PORT") ?? "5672") ,
             UserName = Environment.GetEnvironmentVariable("RABBITMQ_USERNAME") ?? "guest",
             Password = Environment.GetEnvironmentVariable("RABBITMQ_PASSWORD") ?? "guest"
         };

@@ -11,7 +11,7 @@ public class OrderController(IOrderService orderService, IEventBus eventBus) : C
     [HttpGet]
     [Authorize(Policy = "AdminOnly")]
     public async Task<IActionResult> GetAllOrders()
-    {   
+    {
         var orders = await _orderService.GetAllOrdersAsync();
         return Ok(orders);
     }
@@ -41,9 +41,13 @@ public class OrderController(IOrderService orderService, IEventBus eventBus) : C
             UserId = userId,
             Status = createdOrder.Status,
             TotalPrice = createdOrder.TotalPrice,
-            Items = createdOrder.Items
+            Items = createdOrder.Items.Select(i => new SharedOrderItem
+            {
+                ProductId = i.ProductId,
+                Quantity = i.Quantity
+            }).ToList()
         };
-        _eventBus.Publish(orderCreatedEvent);
+        await _eventBus.PublishAsync(orderCreatedEvent);
         return CreatedAtAction(nameof(GetOrderById), new { orderId = createdOrder.Id }, createdOrder);
     }
 
@@ -56,7 +60,7 @@ public class OrderController(IOrderService orderService, IEventBus eventBus) : C
         {
             return NotFound();
         }
-        if(order.UserId != userId) return Forbid();
+        if (order.UserId != userId) return Forbid();
         return Ok(order);
     }
 
@@ -70,7 +74,7 @@ public class OrderController(IOrderService orderService, IEventBus eventBus) : C
         {
             return NotFound();
         }
-        if(userRole != "Admin" && orders.Any(o => o.UserId != userNameId)) return Forbid();
+        if (userRole != "Admin" && orders.Any(o => o.UserId != userNameId)) return Forbid();
         return Ok(orders);
     }
 
