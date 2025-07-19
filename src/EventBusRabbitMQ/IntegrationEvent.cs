@@ -1,7 +1,12 @@
-﻿namespace EventBusRabbitMQ;
+namespace EventBusRabbitMQ;
 
 public abstract class IntegrationEvent
 {
     public Guid Id { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.Now.AddHours(7);
+    public DateTime CreatedAt { get; set; }
+    protected IntegrationEvent()
+    {
+        Id = Guid.NewGuid();
+        CreatedAt = DateTime.UtcNow.AddHours(7);
+    } 
 }

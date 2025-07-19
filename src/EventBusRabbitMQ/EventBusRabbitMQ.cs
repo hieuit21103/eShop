@@ -20,8 +20,6 @@ public class EventBusRabbitMQ : IEventBus, IAsyncDisposable
 
     public static async Task<EventBusRabbitMQ> CreateAsync(IServiceProvider serviceProvider)
     {
-        Env.Load();
-        Env.TraversePath().Load();
 
         var factory = new ConnectionFactory()
         {
@@ -50,8 +48,10 @@ public class EventBusRabbitMQ : IEventBus, IAsyncDisposable
         try
         {
             var eventName = @event.GetType().Name;
-            var json = JsonSerializer.Serialize(@event);
+            var json = JsonSerializer.Serialize(@event, @event.GetType());
             var body = Encoding.UTF8.GetBytes(json);
+
+            _logger.LogInformation("Publishing event {EventName} with ID {EventId}", eventName, @event.Id);
 
             await _channel.BasicPublishAsync(
                 exchange: "eshop_eventbus",
@@ -97,6 +97,7 @@ public class EventBusRabbitMQ : IEventBus, IAsyncDisposable
                 try
                 {
                     var json = Encoding.UTF8.GetString(ea.Body.ToArray());
+                    _logger.LogInformation("[EventBusRabbitMQ] Raw JSON received for event {EventName}: {Json}", eventName, json);
                     var @event = JsonSerializer.Deserialize<TEvent>(json);
 
                     if (@event == null)

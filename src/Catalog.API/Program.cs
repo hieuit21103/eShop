@@ -76,6 +76,7 @@ builder.Services.AddAuthorization(options =>
 // Add services
 builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
 builder.Services.AddScoped<IIntegrationEventHandler<OrderCreatedEvent>, OrderCreatedEventHandler>();
+builder.Services.AddScoped<OrderCreatedEventHandler>();
 
 builder.Services.AddControllers();
 

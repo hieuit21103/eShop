@@ -13,5 +13,11 @@ public class SharedOrderItem
 {
     public Guid ProductId { get; set; }
     public int Quantity { get; set; }
+
+    public SharedOrderItem(Guid productId, int quantity)
+    {
+        ProductId = productId;
+        Quantity = quantity;
+    }
 }
 

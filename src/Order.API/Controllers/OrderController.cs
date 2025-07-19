@@ -3,10 +3,11 @@ namespace Order.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize]
-public class OrderController(IOrderService orderService, IEventBus eventBus) : ControllerBase
+public class OrderController(IOrderService orderService, IEventBus eventBus, ILogger<OrderController> logger) : ControllerBase
 {
     private readonly IOrderService _orderService = orderService;
     private readonly IEventBus _eventBus = eventBus;
+    private readonly ILogger<OrderController> _logger = logger;
 
     [HttpGet]
     [Authorize(Policy = "AdminOnly")]
@@ -35,18 +36,30 @@ public class OrderController(IOrderService orderService, IEventBus eventBus) : C
             return BadRequest("Failed to create order");
         }
 
+        if (createdOrder.Items == null || !createdOrder.Items.Any())
+        {
+            _logger.LogWarning("createdOrder.Items is null or empty when creating OrderCreatedEvent for OrderId: {OrderId}", createdOrder.Id);
+        }
+        else
+        {
+            foreach (var item in createdOrder.Items)
+            {
+                _logger.LogInformation("Order item logged with Product ID: {ProductId}, Quantity: {Quantity}", item.ProductId, item.Quantity);
+            }
+        }
+
         var orderCreatedEvent = new OrderCreatedEvent
         {
             OrderId = createdOrder.Id,
             UserId = userId,
             Status = createdOrder.Status,
             TotalPrice = createdOrder.TotalPrice,
-            Items = createdOrder.Items.Select(i => new SharedOrderItem
-            {
-                ProductId = i.ProductId,
-                Quantity = i.Quantity
-            }).ToList()
+            Items = createdOrder.Items == null ? new List<SharedOrderItem>() : createdOrder.Items.Select(i => new SharedOrderItem(i.ProductId, i.Quantity)).ToList()
         };
+        foreach (var item in orderCreatedEvent.Items)
+        {
+            _logger.LogInformation("OrderCreatedEvent Item: ProductId={ProductId}, Quantity={Quantity}", item.ProductId, item.Quantity);
+        }
         await _eventBus.PublishAsync(orderCreatedEvent);
         return CreatedAtAction(nameof(GetOrderById), new { orderId = createdOrder.Id }, createdOrder);
     }
