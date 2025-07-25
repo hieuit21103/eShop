@@ -6,19 +6,22 @@ public class OrderService(IProductService productService, ILogger<OrderService> 
     private readonly ILogger<OrderService> _logger = logger;
     private readonly ApplicationDbContext _context = context;
 
-    public async Task<CustomerOrder> CreateOrderAsync(CreateOrderDto createOrderDto, string userId)
+    public async Task<CreateOrderResult> CreateOrderAsync(CreateOrderDto createOrderDto, Guid userId)
     {
         var order = new CustomerOrder
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            Status = "Pending",
-            Items = new List<OrderItem>()
+            Status = OrderStatus.Pending,
+            Items = new List<OrderItem>(),
+            PaymentId = Guid.NewGuid(),
+            PaymentStatus = PaymentStatus.Pending,
+            PaymentMethod = createOrderDto.PaymentMethod,
         };
         if (createOrderDto.Items == null || createOrderDto.Items.Count == 0)
         {
             _logger.LogError("Order cannot be empty");
-            return null;
+            return CreateOrderResult.Fail("Order cannot be empty");
         }
         foreach (var item in createOrderDto.Items)
         {
@@ -26,12 +29,12 @@ public class OrderService(IProductService productService, ILogger<OrderService> 
             if (product == null)
             {
                 _logger.LogError("Product with Id: {ProductId} not found", item.ProductId);
-                return null;
+                return CreateOrderResult.Fail($"Product with Id: {item.ProductId} not found");
             }
             if (item.Quantity > product.StockQuantity)
             {
                 _logger.LogError("Not enough quantity for ProductId: {ProductId}", item.ProductId);
-                return null;
+                return CreateOrderResult.Fail($"Not enough quantity for ProductId: {item.ProductId}");
             }
             order.Items.Add(new OrderItem(
                 id: Guid.NewGuid(),
@@ -45,8 +48,8 @@ public class OrderService(IProductService productService, ILogger<OrderService> 
         order.TotalPrice = order.Items.Sum(item => item.Quantity * item.UnitPrice);
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
-        _logger.LogInformation("Order created with Id: {OrderId}", order.Id);
-        return order;
+        _logger.LogInformation("Payment Info created with Id: {PaymentInfoId} for OrderId: {OrderId}", order.PaymentId, order.Id);
+        return CreateOrderResult.Ok(order);
     }
 
     public async Task<IEnumerable<CustomerOrder>> GetAllOrdersAsync()
@@ -59,12 +62,12 @@ public class OrderService(IProductService productService, ILogger<OrderService> 
         return await _context.Orders.FindAsync(orderId);
     }
 
-    public async Task<IEnumerable<CustomerOrder>> GetOrdersByUserIdAsync(string userId)
+    public async Task<IEnumerable<CustomerOrder>> GetOrdersByUserIdAsync(Guid userId)
     {
         return await _context.Orders.Where(o => o.UserId == userId).ToListAsync();
     }
 
-    public async Task UpdateOrderStatusAsync(Guid orderId, string status)
+    public async Task UpdateOrderStatusAsync(Guid orderId, OrderStatus status)
     {
         var order = await GetOrderByIdAsync(orderId);
         if (order != null)

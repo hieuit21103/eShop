@@ -1,0 +1,23 @@
+global using System;
+global using System.Collections.Generic;
+global using Microsoft.AspNetCore.Mvc;
+global using Payment.API.Models;
+global using Payment.API.Services;
+global using Payment.API.Controllers;
+global using System.Text;
+global using EventBusRabbitMQ;
+global using Shared.Event;
+global using PaymentServiceProvider;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.IdentityModel.Tokens;
+global using Microsoft.IdentityModel.JsonWebTokens;
+global using System.Threading.Tasks;
+global using Microsoft.Extensions.DependencyInjection;
+global using Payment.API.Infrastructure.Data;
+global using Microsoft.EntityFrameworkCore;
+global using Pomelo.EntityFrameworkCore.MySql;
+global using Microsoft.AspNetCore.Http;
+global using Shared.Event.Enums;
+global using System.Web;
+

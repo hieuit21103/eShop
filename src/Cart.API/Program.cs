@@ -2,10 +2,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 
-//Load environment variables from .env file
-DotNetEnv.Env.Load();
-DotNetEnv.Env.TraversePath().Load();
-
 // Add CORS policy
 builder.Services.AddCors(options =>
 {

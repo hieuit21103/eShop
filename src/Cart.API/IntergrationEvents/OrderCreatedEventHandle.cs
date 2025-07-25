@@ -7,7 +7,7 @@ public class OrderCreatedEventHandle(ICartService cartService, ILogger<OrderCrea
     public async Task Handle(OrderCreatedEvent @event)
     {
         _logger.LogInformation("Handling OrderCreatedEvent for UserId: {UserId}", @event.UserId);
-        var cart = await _cartService.GetCartAsync(@event.UserId);
+        var cart = await _cartService.GetCartAsync(@event.UserId.ToString());
         if (cart != null)
         {
             cart.Items.Clear();

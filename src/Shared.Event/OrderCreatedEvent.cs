@@ -1,11 +1,16 @@
-﻿namespace Shared.Event;
+﻿using Shared.Event.Enums;
+
+namespace Shared.Event;
 
 public class OrderCreatedEvent : IntegrationEvent
 {
     public Guid OrderId { get; set; }
-    public string UserId { get; set; }
-    public string Status { get; set; }
+    public Guid UserId { get; set; }
+    public OrderStatus Status { get; set; }
     public decimal TotalPrice { get; set; }
+    public Guid PaymentId { get; set; }
+    public PaymentMethod PaymentMethod { get; set; }
+    public PaymentStatus PaymentStatus { get; set; }
     public List<SharedOrderItem> Items { get; set; } = new List<SharedOrderItem>();
 }
 

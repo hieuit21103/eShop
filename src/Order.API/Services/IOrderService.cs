@@ -3,9 +3,9 @@ namespace Order.API.Services;
 public interface IOrderService
 {
     Task<IEnumerable<CustomerOrder>> GetAllOrdersAsync();
-    Task<CustomerOrder> CreateOrderAsync(CreateOrderDto createOrderDto, string userId);
+    Task<CreateOrderResult> CreateOrderAsync(CreateOrderDto createOrderDto, Guid userId);
     Task<CustomerOrder> GetOrderByIdAsync(Guid orderId);
-    Task<IEnumerable<CustomerOrder>> GetOrdersByUserIdAsync(string userId);
-    Task UpdateOrderStatusAsync(Guid orderId, string status);
+    Task<IEnumerable<CustomerOrder>> GetOrdersByUserIdAsync(Guid userId);
+    Task UpdateOrderStatusAsync(Guid orderId, OrderStatus status);
     Task DeleteOrderAsync(Guid orderId);
 }

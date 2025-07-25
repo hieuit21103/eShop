@@ -21,4 +21,8 @@ global using System.Text.Json.Serialization;
 global using System.Threading.Tasks;
 global using EventBusRabbitMQ;
 global using Shared.Event;
+global using Shared.Event.Enums;
+global using System.Net.Http.Headers;
+global using Microsoft.AspNetCore.Http;
+
 

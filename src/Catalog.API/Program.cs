@@ -87,10 +87,6 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-
-    // Kiểm tra tất cả registered services
-    var allServices = builder.Services.Select(x => x.ServiceType.Name).ToList();
-    Console.WriteLine($"All registered services: {string.Join(", ", allServices)}");
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
 
