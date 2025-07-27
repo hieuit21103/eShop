@@ -52,9 +52,32 @@ public class OrderService(IProductService productService, ILogger<OrderService> 
         return CreateOrderResult.Ok(order);
     }
 
-    public async Task<IEnumerable<CustomerOrder>> GetAllOrdersAsync()
+    public async Task<PagedResult<CustomerOrder>> GetAllOrdersAsync(int page = 1, int pageSize = 10, OrderStatus status = OrderStatus.Pending)
     {
-        return await _context.Orders.ToListAsync();
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+        
+        var query = _context.Orders.AsQueryable();
+
+        if (status != OrderStatus.Pending)
+        {
+            query = query.Where(o => o.Status == status);
+        }
+
+        var totalCount = await query.CountAsync();
+        var orders = await query
+            .OrderByDescending(o => o.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PagedResult<CustomerOrder>
+        {
+            Items = orders,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
     }
 
     public async Task<CustomerOrder> GetOrderByIdAsync(Guid orderId)

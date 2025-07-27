@@ -5,10 +5,27 @@ public class PaymentService(ILogger<PaymentService> logger, ApplicationDbContext
     private readonly ILogger<PaymentService> _logger = logger;
     private readonly ApplicationDbContext _context = context;
 
-    public async Task<List<PaymentInfo>> GetAllAsync()
+    public async Task<PagedResult<PaymentInfo>> GetAllAsync(int page = 1, int pageSize = 10)
     {
         _logger.LogInformation("Fetching all payment infos.");
-        return await _context.PaymentInfos.ToListAsync();
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+
+        var query = _context.PaymentInfos.AsQueryable();
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PagedResult<PaymentInfo>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
     }
 
     public async Task<PaymentInfo?> GetByOrderIdAsync(Guid orderId)
@@ -83,5 +100,5 @@ public class PaymentService(ILogger<PaymentService> logger, ApplicationDbContext
             return false;
         }
     }
-    
+
 }

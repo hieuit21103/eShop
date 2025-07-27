@@ -10,7 +10,7 @@ namespace Identity.API.Services.Interfaces
         /// Gets all entities.
         /// </summary>
         /// <returns>A collection of entities.</returns>
-        IEnumerable<T> GetAll();
+        PagedResult<T> GetAll(int page = 1, int pageSize = 10);
 
         /// <summary>
         /// Gets an entity by its identifier.

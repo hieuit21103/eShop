@@ -14,11 +14,11 @@ public abstract class BaseController<T>(IGenericService<T> genericService, ILogg
 
     [AllowAnonymous]
     [HttpGet]
-    public virtual async Task<IActionResult> GetAll()
+    public virtual async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
     {
         try
         {
-            var entities = await _genericService.GetAllAsync();
+            var entities = await _genericService.GetAllAsync(page, pageSize);
             return Ok(entities);
         }
         catch (Exception ex)

@@ -13,6 +13,14 @@ public class PaymentController(IPaymentService<PaymentService> paymentService, I
     private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
     private readonly IPaymentService<PaymentService> _paymentService = paymentService;
 
+    [HttpGet]
+    [Authorize(Policy = "AdminOnly")]
+    public async Task<IActionResult> GetAllPayments(int page = 1, int pageSize = 10)
+    {
+        var payments = await _paymentService.GetAllAsync(page, pageSize);
+        return Ok(payments);
+    }
+
     [HttpGet("{orderId}")]
     public async Task<IActionResult> GetPaymentInfo(Guid orderId)
     {

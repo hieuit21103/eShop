@@ -4,9 +4,26 @@ public class GenericService<T>(ApplicationDbContext context) : IGenericService<T
 {
     protected readonly DbSet<T> _dbSet = context.Set<T>();
 
-    public async Task<IEnumerable<T>> GetAllAsync()
+    public async Task<PagedResult<T>> GetAllAsync(int page = 1, int pageSize = 10)
     {
-        return await _dbSet.ToListAsync();
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+
+        var query = _dbSet.AsQueryable();
+        var totalCount = await query.CountAsync();
+
+        var result = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PagedResult<T>
+        {
+            Items = result,
+            TotalCount = totalCount,
+            Page = page,
+            PageSize = pageSize
+        };
     }
 
     public async Task<T> GetByIdAsync(Guid id)

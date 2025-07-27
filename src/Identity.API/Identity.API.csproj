@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Shared.Event\Shared.Event.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="EmailTemplates\**\*" CopyToOutputDirectory="Always" />
   </ItemGroup>
 

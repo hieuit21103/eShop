@@ -12,12 +12,23 @@ namespace Identity.API.Services
             _dbSet = context.Set<T>();
         }
 
-        public virtual IEnumerable<T> GetAll()
+        public virtual PagedResult<T> GetAll(int page = 1, int pageSize = 10)
         {
-            var list = _dbSet.ToList();
-            if (list == null || !list.Any())
-                throw new KeyNotFoundException("No entities found.");
-            return list;
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+
+            var query = _dbSet.AsQueryable();
+            var totalCount = query.Count();
+
+            var items = query.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+            return new PagedResult<T>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
         }
 
         public virtual T GetById(object id)

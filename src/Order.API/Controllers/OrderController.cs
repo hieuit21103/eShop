@@ -12,9 +12,9 @@ public class OrderController(IOrderService orderService, IPaymentService payment
 
     [HttpGet]
     [Authorize(Policy = "AdminOnly")]
-    public async Task<IActionResult> GetAllOrders()
+    public async Task<IActionResult> GetAllOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromBody] OrderStatus status = OrderStatus.Pending)
     {
-        var orders = await _orderService.GetAllOrdersAsync();
+        var orders = await _orderService.GetAllOrdersAsync(page, pageSize, status);
         return Ok(orders);
     }
 

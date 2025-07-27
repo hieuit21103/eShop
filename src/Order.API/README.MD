@@ -92,13 +92,7 @@ Content-Type: application/json
       "quantity": number
     }
   ],
-  "shippingAddress": {
-    "street": "string",
-    "city": "string",
-    "state": "string",
-    "zipCode": "string",
-    "country": "string"
-  }
+  "paymentMethod": number
 }
 ```
 

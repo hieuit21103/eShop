@@ -13,9 +13,9 @@ namespace Identity.API.Controllers
 
         [HttpGet]
         [Authorize(Policy = "AdminOnly")]
-        public IActionResult GetAll()
+        public IActionResult GetAll(int page = 1, int pageSize = 10)
         {
-            var entities = _genericService.GetAll();
+            var entities = _genericService.GetAll(page, pageSize);
             return Ok(entities);
         }
 
