@@ -81,6 +81,7 @@ services:
       - 5003:80
       - 5503:443
     environment:
+      URL: ${URL}
       JWT_KEY: ${JWT_KEY}
       JWT_ISSUER: ${JWT_ISSUER}
       JWT_AUDIENCE: ${JWT_AUDIENCE}

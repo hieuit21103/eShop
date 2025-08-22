@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const AUTH_API_URL = import.meta.env.VITE_IDENTITY_API_URL + 'auth' || 'http://localhost:5295/api/auth';
+const AUTH_API_URL = import.meta.env.VITE_IDENTITY_API_URL + 'auth' || 'http://localhost:5003/api/auth';
 
 export interface RegisterPayload {
     username: string;
@@ -30,12 +30,7 @@ class AuthService {
     }
 
     async login(payload: LoginPayload): Promise<{ status: number, token: string }> {
-        console.log('${AUTH_API_URL}/login)');
-        const response = await axios.post(`${AUTH_API_URL}/login`, payload ,
-            {
-                withCredentials: true,
-            }
-        );
+        const response = await axios.post(`${AUTH_API_URL}/login`, payload);
         return {status: response.status, token: response.data.Token}; // Assuming the response contains a Token field
     }
 

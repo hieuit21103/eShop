@@ -10,7 +10,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll",
         policy =>
         {
-            policy.WithOrigins("localhost", "https://localhost:5001")
+            policy.WithOrigins(Environment.GetEnvironmentVariable("URL")??"localhost", "https://localhost:5001")
                   .AllowCredentials()
                   .AllowAnyMethod()
                   .AllowAnyHeader();

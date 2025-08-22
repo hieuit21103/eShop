@@ -31,7 +31,7 @@ const LoginPage: React.FC = () => {
 
         setTimeout(() => {
             setIsLoading(false);
-            console.log('Login attempt:', { username, password });
+            // console.log('Login attempt:', { username, password });
         }, 2000);
     };
 
