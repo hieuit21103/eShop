@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Lock, Mail, ArrowRight, User, UserPlus, LockKeyhole, KeyIcon, KeySquare, KeyRound, AlertCircle, X } from 'lucide-react';
-import AuthService from '../services/auth-service';
+import AuthService from '../../services/auth-service';
 import { Link } from 'react-router';
 
 const RegisterPage: React.FC = () => {

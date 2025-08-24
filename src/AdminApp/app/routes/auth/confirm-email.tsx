@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from "react-router";
 import { Mail, CheckCircle, XCircle, AlertCircle, ArrowRight, RefreshCw } from 'lucide-react';
-import AuthService from '../services/auth-service';
+import AuthService from '../../services/auth-service';
 
 const ConfirmEmail: React.FC = () => {
     const [searchParams] = useSearchParams();

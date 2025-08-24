@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router';
 import { Eye, EyeOff, Lock, Mail, ArrowRight, User, AlertCircle, X } from 'lucide-react';
-import AuthService from '../services/auth-service';
+import AuthService from '../../services/auth-service';
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState('');
