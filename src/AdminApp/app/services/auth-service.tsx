@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const AUTH_API_URL = import.meta.env.VITE_IDENTITY_API_URL + 'auth' || 'http://localhost:5003/api/auth';
+const AUTH_API_URL = import.meta.env.VITE_AUTH_API_URL + 'auth' || 'http://localhost:5003/api/auth';
 
 export interface RegisterPayload {
     username: string;

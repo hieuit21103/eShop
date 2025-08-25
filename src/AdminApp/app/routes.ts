@@ -21,5 +21,6 @@ export default [
   route("/forgot-password", "./routes/auth/forgot-password.tsx"),
   route("/reset-password", "./routes/auth/reset-password.tsx"),
   route("/confirm-email", "./routes/auth/confirm-email.tsx"),
+  route("*", "./routes/not-found.tsx"),
   // pattern ^           ^ module file
 ] satisfies RouteConfig;
