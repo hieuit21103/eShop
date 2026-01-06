@@ -1,41 +1,67 @@
+using MassTransit;
+
 var builder = WebApplication.CreateBuilder(args);
 
-//Load environment variables from .env file
-DotNetEnv.Env.Load();
-DotNetEnv.Env.TraversePath().Load();
-
-// Add CORS policy
-builder.Services.AddCors(options =>
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
 {
-    options.AddPolicy("AllowAll",
-        policy =>
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Identity API",
+        Version = "v1"
+    });
+
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme."
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
         {
-            policy.WithOrigins(Environment.GetEnvironmentVariable("URL")??"localhost", "https://localhost:5001")
-                  .AllowCredentials()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-        });
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
 });
 
-// Add OpenAPI support
-builder.Services.AddOpenApi();
+// Configure MassTransit
+builder.Services.AddMassTransit(x =>
+{
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(builder.Configuration["RabbitMQ:Host"] ?? "localhost", "/", h =>
+        {
+            h.Username(builder.Configuration["RabbitMQ:Username"] ?? "guest");
+            h.Password(builder.Configuration["RabbitMQ:Password"] ?? "guest");
+        });
+    });
+});
 
-// Add ApplicationDbContext with MySQL
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    var host = Environment.GetEnvironmentVariable("DB_HOST");
-    var port = Environment.GetEnvironmentVariable("DB_PORT") ?? "3306";
-    var database = Environment.GetEnvironmentVariable("DB_DATABASE");
-    var user = Environment.GetEnvironmentVariable("DB_USERNAME");
-    var password = Environment.GetEnvironmentVariable("DB_PASSWORD");
-    var connectionString = $"server={host};port={port};database={database};user={user};password={password};";
-    options.UseMySql(
-        connectionString,
-        ServerVersion.AutoDetect(connectionString));
+    var host = builder.Configuration["ConnectionStrings:Host"] ?? throw new InvalidOperationException("Database host is not configured.");
+    var port = builder.Configuration["ConnectionStrings:Port"] ?? throw new InvalidOperationException("Database port is not configured.");
+    var database = builder.Configuration["ConnectionStrings:Database"] ?? throw new InvalidOperationException("Database name is not configured.");
+    var user = builder.Configuration["ConnectionStrings:Username"] ?? throw new InvalidOperationException("Database username is not configured.");
+    var password = builder.Configuration["ConnectionStrings:Password"] ?? throw new InvalidOperationException("Database password is not configured.");
+    var connectionString = $"host={host};port={port};database={database};username={user};password={password};";
+    options.UseNpgsql(connectionString);
 });
 
-// Add Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(option => option.SignIn.RequireConfirmedAccount = false)
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(option => option.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
@@ -53,42 +79,35 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "localhost",
-        ValidAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? "localhost",
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWT_KEY") ?? "your-secret-key-here-change-this-in-production"))
-    };
-
-    options.Events = new JwtBearerEvents
-    {
-        OnMessageReceived = context =>
-        {
-            if (context.Request.Cookies.TryGetValue("JWT", out var cookieToken))
-            {
-                context.Token = cookieToken;
-            }
-            return Task.CompletedTask;
-        }
+        ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "localhost",
+        ValidAudience = builder.Configuration["Jwt:Audience"] ?? "localhost",
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"] ?? "your-secret-key-here-change-this-in-production"))
     };
 });
 
-// Add custom Authorization policies
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("UserOnly", policy => policy.RequireRole("User", "Admin"));
-});
+
+// Register Repositories
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 
 // Register services
-builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<JwtService>();
-
-builder.Services.AddScoped<EmailService>();
-builder.Services.AddScoped<IGenericService<ApplicationUser>, ApplicationUserService>();
-builder.Services.AddScoped<IGenericService<UserAddress>, UserAddressService>();
-builder.Services.AddScoped<IGenericService<UserProfile>, UserProfileService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
+builder.Services.AddScoped<IUserAddressService, UserAddressService>();
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 
 // Register controllers
 builder.Services.AddControllers();
+builder.Services.AddAutoMapper(config =>
+{
+    config.AddProfile<MappingProfile>();
+});
+
+// Register GRPC services
+builder.Services.AddGrpcClient<FileStorage.Protos.FileStorageService.FileStorageServiceClient>(o =>
+{
+    o.Address = new Uri(builder.Configuration["FileStorage:GrpcUrl"] ?? throw new InvalidOperationException("FileStorage gRPC URL is not configured"));
+});
 
 var app = builder.Build();
 
@@ -103,13 +122,12 @@ app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAll");
 app.MapControllers();
-
-app.UseHttpsRedirection();
+app.UseMiddleware<GlobalExceptionHandler>();
 
 // Seed the database with initial data
 using (var scope = app.Services.CreateScope())
@@ -117,11 +135,11 @@ using (var scope = app.Services.CreateScope())
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ApplicationDbContext>();
     context.Database.EnsureCreated();
-    SeedRole.SeedRolesAsync(services).Wait();
+    await SeedRole.SeedRolesAsync(services);
     Console.WriteLine("Roles seeded");
-    SeedUser.SeedUsersAsync(services).Wait();
+    await SeedUser.SeedUsersAsync(services);
     Console.WriteLine("Users seeded");
-    SeedUserRole.SeedUserRolesAsync(services).Wait();
+    await SeedUserRole.SeedUserRolesAsync(services);
     Console.WriteLine("User roles seeded");
 }
 
