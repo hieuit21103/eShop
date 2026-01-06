@@ -1,4 +1,5 @@
 namespace Shared.Event.Enums;
+
 public enum PaymentStatusCode
 {
     [Description("Giao dịch thành công")]

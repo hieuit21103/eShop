@@ -7,7 +7,7 @@ public class PaymentUrlCreatedEvent : IntegrationEvent
     public string PaymentUrl { get; set; }
     public DateTime CreatedAt { get; set; }
 
-    public PaymentUrlCreatedEvent(Guid orderId,Guid userId, string paymentUrl)
+    public PaymentUrlCreatedEvent(Guid orderId, Guid userId, string paymentUrl)
     {
         OrderId = orderId;
         UserId = userId;
