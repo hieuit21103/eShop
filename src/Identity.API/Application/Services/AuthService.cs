@@ -142,6 +142,18 @@ public class AuthService : IAuthService
 
         if (refreshToken.RevokedAt != null)
         {
+            // Detect refresh token reuse
+            _logger.LogWarning("Reuse of revoked refresh token detected. Revoking all tokens for user {UserId}", refreshToken.UserId);
+            
+            var allUserTokensSpec = new RefreshTokenByUserIdSpecification(refreshToken.UserId);
+            var allUserTokens = await _refreshTokenRepository.ListAsync(allUserTokensSpec);
+            
+            foreach (var tokenToRevoke in allUserTokens)
+            {
+                tokenToRevoke.RevokedAt = DateTime.UtcNow;
+            }
+            await _refreshTokenRepository.UpdateRangeAsync(allUserTokens);
+
             throw new InvalidOperationException("Refresh token is revoked.");
         }
 
