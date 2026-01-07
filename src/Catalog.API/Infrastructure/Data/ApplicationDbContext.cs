@@ -14,9 +14,6 @@ public class ApplicationDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Product>().ToTable("Products");
-        modelBuilder.Entity<Category>().ToTable("Categories");
-        modelBuilder.Entity<Brand>().ToTable("Brands");
-        modelBuilder.Entity<ProductImages>().ToTable("ProductImages");
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
     }
 }
